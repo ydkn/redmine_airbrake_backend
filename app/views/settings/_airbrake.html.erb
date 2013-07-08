@@ -1,0 +1,9 @@
+<p>
+  <%=label_tag 'settings[hash_field]', l(:settings_airbrake_hash_field) %>
+  <%=select('settings[hash_field]', nil, IssueCustomField.where(field_format: 'string').order(:name).collect{|cf| [cf.name, cf.id]}, selected: @settings[:hash_field]) %>
+</p>
+
+<p>
+  <%=label_tag 'settings[occurrences_field]', l(:settings_airbrake_occurrences_field) %>
+  <%=select('settings[occurrences_field]', nil, IssueCustomField.where(field_format: 'int').order(:name).collect{|cf| [cf.name, cf.id]}, selected: @settings[:occurrences_field], include_blank: true) %>
+</p>

@@ -1,0 +1,32 @@
+<% @airbrake_project_setting ||= (@project.airbrake_settings || AirbrakeProjectSetting.new(project: @project)) %>
+
+<h2><%= l(:label_airbrake) %></h2>
+
+<%= labelled_form_for :airbrake_project_setting, @airbrake_project_setting, url: airbrake_settings_project_path(@project), html: {method: :post, id: 'airbrake-form'} do |f| %>
+  <%= error_messages_for 'airbrake_project_setting' %>
+
+  <div class="box tabular">
+    <p>
+      <%=f.label :tracker_id %>
+      <%=f.select :tracker_id, options_from_collection_for_select(@project.trackers, :id, :name, @airbrake_project_setting.tracker_id), include_blank: true %>
+    </p>
+    <p>
+      <%=f.label :category_id %>
+      <%=f.select :category_id, options_from_collection_for_select(@project.issue_categories, :id, :name, @airbrake_project_setting.category_id), include_blank: true %>
+    </p>
+    <p>
+      <%=f.label :priority_id %>
+      <%=f.select :priority_id, options_from_collection_for_select(IssuePriority.order(:position), :id, :name, @airbrake_project_setting.priority_id), include_blank: true %>
+    </p>
+    <p>
+      <%=f.label :reopen_regexp %>
+      <%=f.text_field :reopen_regexp %>
+      <br />
+      (<%=l(:text_regexp_info)%>)
+    </p>
+  </div>
+
+  <p>
+    <%= submit_tag(l(:button_save)) %>
+  </p>
+<% end %>

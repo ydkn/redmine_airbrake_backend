@@ -1,0 +1,10 @@
+en:
+  label_airbrake: Airbrake
+
+  field_reopen_regexp: Reopen regular expression
+
+  settings_airbrake_hash_field: Notice Hash Custom Field
+  settings_airbrake_occurrences_field: Occurrences Custom Field
+
+  project_module_airbrake: Airbrake
+  permission_manage_airbrake: Manage Airbrake

@@ -1,0 +1,38 @@
+h1. <%= @notice[:error][:message] %>
+
+h2. Stacktrace:
+
+p((. <%=raw backtrace.collect{|e| format_backtrace(e)}.join("\n") %>
+
+<% if @notice[:request].present? %>
+h2. Request:
+
+<%=format_list_item('URL', @notice[:request][:url]) %>
+<%=format_list_item('Component', @notice[:request][:component]) %>
+<%=format_list_item('Action', @notice[:request][:action]) %>
+
+<% if @notice[:request][:params].present? %>
+h2. Parameters: 
+
+<%=format_table(@notice[:request][:params]) %>
+<% end %>
+
+<% if @notice[:request][:cgi_data].present? %>
+h2. Headers: 
+
+<%=format_table(@notice[:request][:cgi_data]) %>
+<% end %>
+
+<% if @notice[:request][:session].present? %>
+h2. Session: 
+
+<%=format_table(@notice[:request][:session]) %>
+<% end %>
+<% end %>
+
+<% if @notice[:server_environment].present? %>
+h2. Environment
+
+<%=format_list_item('Directory', @notice[:server_environment][:project_root]) %>
+<%=format_list_item('Hostname', @notice[:server_environment][:hostname]) %>
+<% end %>
