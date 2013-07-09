@@ -1,6 +1,6 @@
 # Redmine Airbrake Backend
 
-This plugin provides the necessary API to use Redmine as a Airbrake backend.
+This plugin provides the necessary API to use Redmine as an Airbrake backend.
 
 ## Installation
 
@@ -46,7 +46,7 @@ end
 
 ## Notes
 
-Based and inspired by https://github.com/milgner/redmine_airbrake_server
+Based on and inspired by https://github.com/milgner/redmine_airbrake_server
 
 ## Code Status
 
