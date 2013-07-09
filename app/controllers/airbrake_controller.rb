@@ -27,7 +27,7 @@ class AirbrakeController < ::ApplicationController
     # Category / Priority / Assignee
     @category = @project.issue_categories.where(id: redmine_params[:category]).first || @project.issue_categories.where(name: redmine_params[:category]).first || project_setting(:category)
     @priority = IssuePriority.where(id: redmine_params[:priority]).first || IssuePriority.where(name: redmine_params[:priority]).first || project_setting(:priority) || IssuePriority.default
-    @assignee = @project.users.where(login: redmine_params[:assignee]).first
+    @assignee = @project.users.where(id: redmine_params[:assignee]).first || @project.users.where(login: redmine_params[:assignee]).first
 
     # Issue by project, tracker and hash
     issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice_hash).select([:customized_id]).collect{|cv| cv.customized_id}
@@ -131,6 +131,7 @@ class AirbrakeController < ::ApplicationController
   end
 
   def project_setting(key)
+    return nil if @project.airbrake_settings.blank?
     @project.airbrake_settings.send(key) if @project.airbrake_settings.respond_to?(key)
   end
 
