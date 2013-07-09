@@ -7,27 +7,17 @@ class AirbrakeController < ::ApplicationController
 
   prepend_before_filter :set_api_auth
   before_filter :parse_notice
+  before_filter :init_vars
 
   accept_api_auth :notice
 
   def notice
-    raise ArgumentError.new("Airbrake version not supported") unless SUPPORTED_API_VERSIONS.include?(@notice[:version])
-
-    # Project
-    @project = Project.where(identifier: redmine_params[:project]).first
-    raise ArgumentError.new("Project not found") unless @project
-
     return unless authorize(:issues, :create)
 
-    # Tracker
-    @tracker = @project.trackers.where(id: redmine_params[:tracker]).first || @project.trackers.where(name: redmine_params[:tracker]).first || project_setting(:tracker)
+    raise ArgumentError.new("Airbrake version not supported") unless SUPPORTED_API_VERSIONS.include?(@notice[:version])
+    raise ArgumentError.new("Project not found") unless @project
     raise ArgumentError.new("Tracker not found") unless @tracker
     raise ArgumentError.new("Tracker does not have a notice hash custom field") unless @tracker.custom_fields.where(id: notice_hash_field.id).first
-
-    # Category / Priority / Assignee
-    @category = @project.issue_categories.where(id: redmine_params[:category]).first || @project.issue_categories.where(name: redmine_params[:category]).first || project_setting(:category)
-    @priority = IssuePriority.where(id: redmine_params[:priority]).first || IssuePriority.where(name: redmine_params[:priority]).first || project_setting(:priority) || IssuePriority.default
-    @assignee = @project.users.where(id: redmine_params[:assignee]).first || @project.users.where(login: redmine_params[:assignee]).first
 
     # Issue by project, tracker and hash
     issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice_hash).select([:customized_id]).collect{|cv| cv.customized_id}
@@ -142,25 +132,24 @@ class AirbrakeController < ::ApplicationController
 
     doc = Hpricot::XML(request.body)
 
+    convert_request_vars(:params, :params)
+    convert_request_vars(:cgi_data, :'cgi-data')
+    convert_request_vars(:session, :session)
+
     unless @notice[:request][:params].blank?
-      request_params = convert_var_elements(doc/'/notice/request/params/var')
-      request_params.delete(:action) # already known
-      request_params.delete(:controller) # already known
-      @notice[:request][:params] = request_params
-    end
-
-    unless @notice[:request][:cgi_data].nil?
-      cgi_data = convert_var_elements(doc/'notice/request/cgi-data/var')
-      @notice[:request][:cgi_data] = cgi_data
-    end
-
-    unless @notice[:request][:session].nil?
-      session_vars = convert_var_elements(doc/'/notice/request/session/var')
-      @notice[:request][:session] = session_vars
+      @notice[:request][:params].delete(:action) # already known
+      @notice[:request][:params].delete(:controller) # already known
     end
   rescue
     @notice = nil
     render nothing: true, status: :bad_request
+  end
+
+  def convert_request_vars(type, pathname)
+    unless @notice[:request][type.to_sym].blank?
+      vars = convert_var_elements(doc/"/notice/request/#{pathname}/var")
+      @notice[:request][type.to_sym] = vars
+    end
   end
 
   def convert_var_elements(elements)
@@ -170,6 +159,24 @@ class AirbrakeController < ::ApplicationController
     end
     result.delete_if{|k,v| k.strip.blank?}
     result.symbolize_keys
+  end
+
+  def init_vars
+    # Project
+    @project = Project.where(identifier: redmine_params[:project]).first
+    return unless @project
+
+    # Tracker
+    @tracker = @project.trackers.where(id: redmine_params[:tracker]).first || @project.trackers.where(name: redmine_params[:tracker]).first || project_setting(:tracker)
+
+    # Category
+    @category = @project.issue_categories.where(id: redmine_params[:category]).first || @project.issue_categories.where(name: redmine_params[:category]).first || project_setting(:category)
+
+    # Priority
+    @priority = IssuePriority.where(id: redmine_params[:priority]).first || IssuePriority.where(name: redmine_params[:priority]).first || project_setting(:priority) || IssuePriority.default
+
+    # Assignee
+    @assignee = @project.users.where(id: redmine_params[:assignee]).first || @project.users.where(login: redmine_params[:assignee]).first
   end
 
 end
