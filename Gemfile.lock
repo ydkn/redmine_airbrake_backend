@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    redmine_airbrake_backend (0.1.0)
+    redmine_airbrake_backend (0.2.0)
       hpricot
       htmlentities
       rails

@@ -5,14 +5,11 @@ class AirbrakeProjectSettingsController < ::ApplicationController
 
   def update
     @airbrake_project_setting = @project.airbrake_settings || AirbrakeProjectSetting.new(project: @project)
-
-    @airbrake_project_setting.tracker = @project.trackers.where(id: params[:airbrake_project_setting][:tracker_id]).first
-    @airbrake_project_setting.category = @project.issue_categories.where(id: params[:airbrake_project_setting][:category_id]).first
-    @airbrake_project_setting.priority = IssuePriority.where(id: params[:airbrake_project_setting][:priority_id]).first
-    @airbrake_project_setting.reopen_regexp = params[:airbrake_project_setting][:reopen_regexp]
+    @airbrake_project_setting.safe_attributes = params[:airbrake_project_setting]
 
     @airbrake_project_setting.save
 
+    flash[:notice] = l(:notice_successful_update)
     redirect_to settings_project_path(@project, :tab => 'airbrake')
   end
 

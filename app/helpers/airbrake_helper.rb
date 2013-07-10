@@ -13,7 +13,7 @@ module AirbrakeHelper
     "* *#{name}:* #{value}"
   end
 
-  def format_backtrace(element)
+  def format_backtrace_element(element)
     @htmlentities ||= HTMLEntities.new
 
     repository = repository_for_backtrace_element(element)
@@ -34,8 +34,8 @@ module AirbrakeHelper
   def repository_for_backtrace_element(element)
     if element[:file].start_with?('[PROJECT_ROOT]')
       file = element[:file][14..-1]
-      if redmine_params.key?(:repository)
-        r = @project.repositories.where(identifier: (redmine_params[:repository] || '')).first
+      if @notice.params.key?(:repository)
+        r = @project.repositories.where(identifier: (@notice.params[:repository] || '')).first
         return r if r.present? && r.entry(file)
       else
         return @project.repositories.select{|r| r.entry(file)}.first

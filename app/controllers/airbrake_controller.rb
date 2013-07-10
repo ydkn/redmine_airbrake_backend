@@ -1,23 +1,13 @@
-require 'json'
-require 'hpricot'
-require 'htmlentities'
+require 'redmine_airbrake_backend/notice'
 
 class AirbrakeController < ::ApplicationController
-  SUPPORTED_API_VERSIONS = %w(2.4)
-
-  prepend_before_filter :set_api_auth
-  before_filter :parse_notice
-  before_filter :init_vars
+  prepend_before_filter :parse_notice_and_api_auth
+  before_filter :load_records
 
   accept_api_auth :notice
 
   def notice
     return unless authorize(:issues, :create)
-
-    raise ArgumentError.new("Airbrake version not supported") unless SUPPORTED_API_VERSIONS.include?(@notice[:version])
-    raise ArgumentError.new("Project not found") unless @project
-    raise ArgumentError.new("Tracker not found") unless @tracker
-    raise ArgumentError.new("Tracker does not have a notice hash custom field") unless @tracker.custom_fields.where(id: notice_hash_field.id).first
 
     # Issue by project, tracker and hash
     issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice_hash).select([:customized_id]).collect{|cv| cv.customized_id}
@@ -29,7 +19,7 @@ class AirbrakeController < ::ApplicationController
         author: User.current,
         category: @category,
         priority: @priority,
-        description: render_to_string(partial: 'issue_description'),
+        description: render_description,
         assigned_to: @assignee
       ) unless @issue
 
@@ -42,7 +32,7 @@ class AirbrakeController < ::ApplicationController
     # Reopen if closed
     if reopen? && @issue.status.is_closed?
       @issue.status = IssueStatus.where(is_default: true).order(:position).first
-      @issue.init_journal(User.current, "Issue reopened after occurring again in environment #{@notice[:server_environment][:environment_name]}")
+      @issue.init_journal(User.current, "Issue reopened after occurring again in environment #{@notice.env[:environment_name]}")
     end
 
     # Hash
@@ -64,39 +54,71 @@ class AirbrakeController < ::ApplicationController
 
   private
 
-  def set_api_auth
-    params[:key] = redmine_params[:api_key] rescue nil
+  def parse_notice_and_api_auth
+    @notice = RedmineAirbrakeBackend::Notice.parse(request.body)
+    params[:key] = @notice.params[:api_key]
+  rescue RedmineAirbrakeBackend::Notice::NoticeInvalid, RedmineAirbrakeBackend::Notice::UnsupportedVersion
+    render nothing: true, status: :bad_request
   end
 
-  def redmine_params
-    JSON.parse(params[:notice][:api_key]).symbolize_keys
+  def load_records
+    # Project
+    unless @project = Project.where(identifier: @notice.params[:project]).first
+      render nothing: true, status: :bad_request
+      return
+    end
+
+    # Tracker
+    unless (@tracker = record_for(@project.trackers, :tracker)) && @tracker.custom_fields.where(id: notice_hash_field.id).first
+      render nothing: true, status: :bad_request
+      return
+    end
+
+    # Category
+    @category = record_for(@project.issue_categories, :category)
+
+    # Priority
+    @priority = record_for(IssuePriority, :priority) || IssuePriority.default
+
+    # Assignee
+    @assignee = record_for(@project.users, :assignee, [:id, :login])
   end
-  helper_method :redmine_params
+
+  def record_for(on, param_key, fields=[:id, :name])
+    fields.each do |field|
+      val = on.where(field => @notice.params[param_key]).first
+      return val if val.present?
+    end
+
+    project_setting(param_key)
+  end
+
+  def project_setting(key)
+    return nil if @project.airbrake_settings.blank?
+    @project.airbrake_settings.send(key) if @project.airbrake_settings.respond_to?(key)
+  end
 
   def subject
-    if @notice[:error][:message].starts_with?("#{@notice[:error][:class]}:")
-      "[#{notice_hash[0..7]}] #{@notice[:error][:message]}"[0..254]
+    if @notice.error[:message].starts_with?("#{@notice.error[:class]}:")
+      "[#{notice_hash[0..7]}] #{@notice.error[:message]}"[0..254]
     else
-      "[#{notice_hash[0..7]}] #{@notice[:error][:class]} #{@notice[:error][:message]}"[0..254]
+      "[#{notice_hash[0..7]}] #{@notice.error[:class]} #{@notice.error[:message]}"[0..254]
     end
   end
-
-  def backtrace
-    if @notice[:error][:backtrace][:line].is_a?(Hash)
-      [@notice[:error][:backtrace][:line]]
-    else
-      @notice[:error][:backtrace][:line]
-    end
-  end
-  helper_method :backtrace
 
   def notice_hash
     h = []
-    h << @notice[:error][:class]
-    h << @notice[:error][:message]
-    h += backtrace.collect{|element| "#{element[:file]}|#{element[:method].gsub(/_\d+_/, '')}|#{element[:number]}"}
+    h << @notice.error[:class]
+    h << @notice.error[:message]
+    h += normalized_backtrace if @notice.error[:backtrace].present?
 
     Digest::MD5.hexdigest(h.compact.join("\n"))
+  end
+
+  def normalized_backtrace
+    @notice.error[:backtrace].collect do |e|
+      "#{e[:file]}|#{e[:method].gsub(/_\d+_/, '')}|#{e[:number]}"
+    end
   end
 
   def notice_hash_field
@@ -112,71 +134,20 @@ class AirbrakeController < ::ApplicationController
   end
 
   def reopen?
-    return false if project_setting(:reopen_regexp).blank?
-    !!(@notice[:server_environment][:environment_name] =~ /#{project_setting(:reopen_regexp)}/i)
+    return false if @notice.env.blank? || @notice.env[:environment_name].blank? || project_setting(:reopen_regexp).blank?
+    !!(@notice.env[:environment_name] =~ /#{project_setting(:reopen_regexp)}/i)
   end
 
   def setting(key)
     Setting.plugin_redmine_airbrake_backend[key]
   end
 
-  def project_setting(key)
-    return nil if @project.airbrake_settings.blank?
-    @project.airbrake_settings.send(key) if @project.airbrake_settings.respond_to?(key)
-  end
-
-  def parse_notice
-    @notice = params[:notice]
-
-    return @notice if @notice[:request].blank?
-
-    doc = Hpricot::XML(request.body)
-
-    convert_request_vars(:params, :params)
-    convert_request_vars(:cgi_data, :'cgi-data')
-    convert_request_vars(:session, :session)
-
-    unless @notice[:request][:params].blank?
-      @notice[:request][:params].delete(:action) # already known
-      @notice[:request][:params].delete(:controller) # already known
+  def render_description
+    if template_exists?("issue_description_#{@notice.params[:type]}", 'airbrake', true)
+      render_to_string(partial: "issue_description_#{@notice.params[:type]}")
+    else
+      render_to_string(partial: 'issue_description')
     end
-  rescue
-    @notice = nil
-    render nothing: true, status: :bad_request
-  end
-
-  def convert_request_vars(type, pathname)
-    unless @notice[:request][type.to_sym].blank?
-      vars = convert_var_elements(doc/"/notice/request/#{pathname}/var")
-      @notice[:request][type.to_sym] = vars
-    end
-  end
-
-  def convert_var_elements(elements)
-    result = {}
-    elements.each do |elem|
-      result[elem.attributes['key']] = elem.inner_text
-    end
-    result.delete_if{|k,v| k.strip.blank?}
-    result.symbolize_keys
-  end
-
-  def init_vars
-    # Project
-    @project = Project.where(identifier: redmine_params[:project]).first
-    return unless @project
-
-    # Tracker
-    @tracker = @project.trackers.where(id: redmine_params[:tracker]).first || @project.trackers.where(name: redmine_params[:tracker]).first || project_setting(:tracker)
-
-    # Category
-    @category = @project.issue_categories.where(id: redmine_params[:category]).first || @project.issue_categories.where(name: redmine_params[:category]).first || project_setting(:category)
-
-    # Priority
-    @priority = IssuePriority.where(id: redmine_params[:priority]).first || IssuePriority.where(name: redmine_params[:priority]).first || project_setting(:priority) || IssuePriority.default
-
-    # Assignee
-    @assignee = @project.users.where(id: redmine_params[:assignee]).first || @project.users.where(login: redmine_params[:assignee]).first
   end
 
 end

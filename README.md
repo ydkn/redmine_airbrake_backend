@@ -46,7 +46,7 @@ end
 
 ## Notes
 
-Based on and inspired by https://github.com/milgner/redmine_airbrake_server
+Based on https://github.com/milgner/redmine_airbrake_server
 
 ## Code Status
 
