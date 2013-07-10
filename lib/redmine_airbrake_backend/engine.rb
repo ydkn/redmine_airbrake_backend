@@ -13,8 +13,11 @@ module RedmineAirbrakeBackend
       Redmine::Plugin.register :redmine_airbrake_backend do
         name 'Airbrake Backend'
         author 'Florian Schwab'
+        author_url 'https://github.com/ydkn'
         description 'Airbrake Backend for Redmine'
-        version '0.0.1'
+        url 'https://github.com/ydkn/redmine_airbrake_backend'
+        version RedmineAirbrakeBackend::VERSION
+        requires_redmine :version_or_higher => '2.3.2'
         directory File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
         project_module :airbrake do
