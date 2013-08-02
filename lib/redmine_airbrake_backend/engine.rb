@@ -16,7 +16,7 @@ module RedmineAirbrakeBackend
         author_url 'https://github.com/ydkn'
         description 'Airbrake Backend for Redmine'
         url 'https://github.com/ydkn/redmine_airbrake_backend'
-        version RedmineAirbrakeBackend::VERSION
+        version ::RedmineAirbrakeBackend::VERSION
         requires_redmine :version_or_higher => '2.3.2'
         directory File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
