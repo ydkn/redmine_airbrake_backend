@@ -1,3 +1,5 @@
+require 'redmine_airbrake_backend/version'
+
 module RedmineAirbrakeBackend
   class Engine < ::Rails::Engine
     initializer 'redmine_airbrake_backend.register_redmine_plugin', after: :load_config_initializers do |app|
