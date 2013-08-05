@@ -116,8 +116,12 @@ class AirbrakeController < ::ApplicationController
   end
 
   def normalized_backtrace
-    @notice.error[:backtrace].collect do |e|
-      "#{e[:file]}|#{e[:method].gsub(/_\d+_/, '')}|#{e[:number]}"
+    if @notice.error.present? && @notice.error[:backtrace].present?
+      @notice.error[:backtrace].collect do |e|
+        "#{e[:file]}|#{e[:method].gsub(/_\d+_/, '')}|#{e[:number]}" rescue nil
+      end.compact
+    else
+      []
     end
   end
 
