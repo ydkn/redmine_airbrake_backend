@@ -99,22 +99,20 @@ class AirbrakeController < ::ApplicationController
   end
 
   def subject
-    if @notice.error[:class].present? && @notice.error[:message].present? && @notice.error[:message].starts_with?("#{@notice.error[:class]}:")
-      "[#{notice_hash[0..7]}] #{@notice.error[:message]}"[0..254].strip
-    elsif @notice.error[:class].present? && @notice.error[:message].present?
-      "[#{notice_hash[0..7]}] #{@notice.error[:class]} #{@notice.error[:message]}"[0..254].strip
-    elsif @notice.error[:message].present?
-      "[#{notice_hash[0..7]}] #{@notice.error[:message]}"[0..254].strip
+    s = ''
+    if @notice.error[:class].blank? || @notice.error[:message].starts_with?("#{@notice.error[:class]}:")
+      s = "[#{notice_hash[0..7]}] #{@notice.error[:message]}"
     else
-      "[#{notice_hash[0..7]}]"[0..254].strip
+      s = "[#{notice_hash[0..7]}] #{@notice.error[:class]} #{@notice.error[:message]}"
     end
+    s[0..254].strip
   end
 
   def notice_hash
     h = []
-    h << @notice.error[:class] unless @notice.error[:class].blank?
-    h << @notice.error[:message] unless @notice.error[:message].blank?
-    h += normalized_backtrace if @notice.error[:backtrace].present?
+    h << @notice.error[:class]
+    h << @notice.error[:message]
+    h += normalized_backtrace
 
     Digest::MD5.hexdigest(h.compact.join("\n"))
   end

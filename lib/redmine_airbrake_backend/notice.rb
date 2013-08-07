@@ -36,23 +36,10 @@ module RedmineAirbrakeBackend
       raise NoticeInvalid if (error = convert_element(notice.at('error'))).blank?
       raise NoticeInvalid if error[:message].blank?
 
-      # Filter invalid backtrace elements
-      if error[:backtrace].present?
-        error[:backtrace] = (error[:backtrace][:line].is_a?(Array) ? error[:backtrace][:line] : [error[:backtrace][:line]]).compact
-        error[:backtrace].reject!{|b| !b.is_a?(Hash)}
-        error.delete(:backtrace) if error[:backtrace].empty?
-      end
+      error[:backtrace] = format_backtrace(error[:backtrace])
 
       request = convert_element(notice.at('request'))
-
-      # Filter session log
-      if request[:session].present? && request[:session][:log].present?
-        request[:session][:log] = JSON.parse(request[:session][:log]) rescue nil
-        request[:session][:log] = (request[:session][:log].is_a?(Array) ? request[:session][:log] : [request[:session][:log]]).compact
-        request[:session][:log].map!{|l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l}
-        request[:session][:log].reject!{|l| !l.is_a?(Hash) || l[:time].blank?}
-        request[:session].delete(:log) if request[:session][:log].empty?
-      end
+      request[:session][:log] = format_session_log(request[:session][:log]) if request[:session].present?
 
       env = convert_element(notice.at('server-environment'))
 
@@ -95,6 +82,26 @@ module RedmineAirbrakeBackend
 
     def self.format_hash_key(key)
       key.to_s.gsub(/-/, '_')
+    end
+
+    def self.ensure_hash_array(data)
+      d = (data.is_a?(Array) ? data : [data]).compact
+      d.reject!{|e| !e.is_a?(Hash)}
+      d.blank? ? nil : d
+    end
+
+    def self.format_backtrace(backtrace)
+      ensure_hash_array(backtrace)
+    end
+
+    def self.format_session_log(log)
+      log = JSON.parse(log) rescue nil
+      return nil unless log = ensure_hash_array(log)
+
+      log.map!{|l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l}
+      log.reject!{|l| l[:time].blank?}
+
+      log.blank? ? nil : log
     end
 
   end
