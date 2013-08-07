@@ -34,7 +34,7 @@ module RedmineAirbrakeBackend
       raise NoticeInvalid if (notifier = convert_element(notice.at('notifier'))).blank?
 
       raise NoticeInvalid if (error = convert_element(notice.at('error'))).blank?
-      raise NoticeInvalid if error[:class].blank? || error[:message].blank?
+      raise NoticeInvalid if error[:message].blank?
 
       # Filter invalid backtrace elements
       unless error[:backtrace].nil?
