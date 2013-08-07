@@ -35,6 +35,7 @@ h2. Session:
 <% if @notice.env.present? %>
 h2. Environment
 
+<%=format_list_item('Name', @notice.env[:environment_name]) %>
 <%=format_list_item('Directory', @notice.env[:project_root]) %>
 <%=format_list_item('Hostname', @notice.env[:hostname]) %>
 <% end %>
