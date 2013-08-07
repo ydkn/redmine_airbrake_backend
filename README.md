@@ -50,6 +50,7 @@ Based on https://github.com/milgner/redmine_airbrake_server
 
 ## Code Status
 
+* [![Gem Version](https://badge.fury.io/rb/redmine_airbrake_backend.png)](http://badge.fury.io/rb/redmine_airbrake_backend)
 * [![Dependencies](https://gemnasium.com/ydkn/redmine_airbrake_backend.png?travis)](https://gemnasium.com/ydkn/redmine_airbrake_backend)
 * [![Code Climate](https://codeclimate.com/github/ydkn/redmine_airbrake_backend.png)](https://codeclimate.com/github/ydkn/redmine_airbrake_backend)
 
