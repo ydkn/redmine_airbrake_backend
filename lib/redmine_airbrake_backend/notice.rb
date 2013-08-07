@@ -35,7 +35,12 @@ module RedmineAirbrakeBackend
 
       raise NoticeInvalid if (error = convert_element(notice.at('error'))).blank?
       raise NoticeInvalid if error[:class].blank? || error[:message].blank?
-      error[:backtrace] = error[:backtrace][:line].is_a?(Array) ? error[:backtrace][:line] : [error[:backtrace][:line]] unless error[:backtrace].nil?
+
+      # Filter invalid backtrace elements
+      unless error[:backtrace].nil?
+        error[:backtrace] = (error[:backtrace][:line].is_a?(Array) ? error[:backtrace][:line] : [error[:backtrace][:line]]).compact
+        error[:backtrace].reject{|b| !b.is_a?(Hash)}
+      end
 
       request = convert_element(notice.at('request'))
       env = convert_element(notice.at('server-environment'))
