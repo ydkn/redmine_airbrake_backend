@@ -37,12 +37,23 @@ module RedmineAirbrakeBackend
       raise NoticeInvalid if error[:message].blank?
 
       # Filter invalid backtrace elements
-      unless error[:backtrace].nil?
+      if error[:backtrace].present?
         error[:backtrace] = (error[:backtrace][:line].is_a?(Array) ? error[:backtrace][:line] : [error[:backtrace][:line]]).compact
-        error[:backtrace].reject{|b| !b.is_a?(Hash)}
+        error[:backtrace].reject!{|b| !b.is_a?(Hash)}
+        error.delete(:backtrace) if error[:backtrace].empty?
       end
 
       request = convert_element(notice.at('request'))
+
+      # Filter session log
+      if request[:session].present? && request[:session][:log].present?
+        request[:session][:log] = JSON.parse(request[:session][:log]) rescue nil
+        request[:session][:log] = (request[:session][:log].is_a?(Array) ? request[:session][:log] : [request[:session][:log]]).compact
+        request[:session][:log].map!{|l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l}
+        request[:session][:log].reject!{|l| !l.is_a?(Hash) || l[:time].blank?}
+        request[:session].delete(:log) if request[:session][:log].empty?
+      end
+
       env = convert_element(notice.at('server-environment'))
 
       new(version, params, notifier, error: error, request: request, env: env)

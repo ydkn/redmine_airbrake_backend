@@ -3,13 +3,23 @@ module AirbrakeHelper
   def format_table(data)
     lines = []
     data.each do |key, value|
+      next unless value.is_a?(String)
       lines << "|@#{key}@|#{value.strip.blank? ? value : "@#{value}@"}|"
     end
     lines.join("\n")
   end
 
+  def format_log(data)
+    lines = []
+    data.each do |log|
+      next unless log.is_a?(Hash)
+      lines << "[#{log[:time].strftime('%F %T')}] #{log[:line]}"
+    end
+    lines.join("\n")
+  end
+
   def format_list_item(name, value)
-    return '' if value.to_s.strip.blank?
+    return '' if value.blank?
     "* *#{name}:* #{value}"
   end
 

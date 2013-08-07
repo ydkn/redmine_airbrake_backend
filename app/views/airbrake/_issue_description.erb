@@ -14,21 +14,30 @@ h2. Request:
 <%=format_list_item('Action', @notice.request[:action]) %>
 
 <% if @notice.request[:params].present? %>
-h2. Parameters: 
+h2. Parameters:
 
 <%=format_table(@notice.request[:params]) %>
 <% end %>
 
 <% if @notice.request[:cgi_data].present? %>
-h2. Headers: 
+h2. Headers:
 
 <%=format_table(@notice.request[:cgi_data]) %>
 <% end %>
 
+<% log = @notice.request[:session].delete(:log) if @notice.request[:session].present? %>
 <% if @notice.request[:session].present? %>
-h2. Session: 
+h2. Session:
 
 <%=format_table(@notice.request[:session]) %>
+<% end %>
+
+<% if log.present? %>
+h2. Log:
+
+<pre>
+<%=format_log(log) %>
+</pre>
 <% end %>
 <% end %>
 
