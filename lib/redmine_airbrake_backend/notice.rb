@@ -85,6 +85,8 @@ module RedmineAirbrakeBackend
     end
 
     def self.ensure_hash_array(data)
+      return nil if data.blank?
+
       d = (data.is_a?(Array) ? data : [data]).compact
       d.reject!{|e| !e.is_a?(Hash)}
       d.blank? ? nil : d
