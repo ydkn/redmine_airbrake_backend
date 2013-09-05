@@ -39,7 +39,9 @@ module RedmineAirbrakeBackend
       error[:backtrace] = format_backtrace(error[:backtrace])
 
       request = convert_element(notice.at('request'))
-      request[:session][:log] = format_session_log(request[:session][:log]) if request[:session].present?
+      if request[:session].present?
+        request[:session][:log] = request[:session][:log].present? ? format_session_log(request[:session][:log]) : nil
+      end
 
       env = convert_element(notice.at('server-environment'))
 
@@ -93,7 +95,7 @@ module RedmineAirbrakeBackend
     end
 
     def self.format_backtrace(backtrace)
-      ensure_hash_array(backtrace)
+      ensure_hash_array(backtrace).first[:line] rescue nil
     end
 
     def self.format_session_log(log)
