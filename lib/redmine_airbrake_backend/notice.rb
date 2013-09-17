@@ -25,16 +25,16 @@ module RedmineAirbrakeBackend
       doc = Hpricot::XML(xml_data)
 
       raise NoticeInvalid if (notice = doc.at('notice')).blank?
-      raise NoticeInvalid if (version = notice.attributes['version']).blank?
-      raise UnsupportedVersion unless SUPPORTED_API_VERSIONS.include?(version)
+      raise NoticeInvalid.new('no version') if (version = notice.attributes['version']).blank?
+      raise UnsupportedVersion.new(version) unless SUPPORTED_API_VERSIONS.include?(version)
 
       params = JSON.parse(notice.at('api-key').inner_text).symbolize_keys rescue nil
-      raise NoticeInvalid if params.blank?
+      raise NoticeInvalid.new('no or invalid api-key') if params.blank?
 
-      raise NoticeInvalid if (notifier = convert_element(notice.at('notifier'))).blank?
+      raise NoticeInvalid.new('no notifier') if (notifier = convert_element(notice.at('notifier'))).blank?
 
-      raise NoticeInvalid if (error = convert_element(notice.at('error'))).blank?
-      raise NoticeInvalid if error[:message].blank?
+      raise NoticeInvalid.new('no error') if (error = convert_element(notice.at('error'))).blank?
+      raise NoticeInvalid.new('no message') if error[:message].blank?
 
       error[:backtrace] = format_backtrace(error[:backtrace])
 
