@@ -19,8 +19,10 @@
     </p>
     <p>
       <%=f.text_field :reopen_regexp %>
-      <br />
-      (<%=l(:text_regexp_info)%>)
+      <em class="info">(<%=l(:text_regexp_info)%>)</em>
+    </p>
+    <p>
+      <%=f.check_box :reopen_repeat_description %>
     </p>
   </div>
 

@@ -10,5 +10,5 @@ class AirbrakeProjectSetting < ActiveRecord::Base
 
   validates_presence_of :project_id
 
-  safe_attributes :tracker_id, :category_id, :priority_id, :reopen_regexp
+  safe_attributes :tracker_id, :category_id, :priority_id, :reopen_regexp, :reopen_repeat_description
 end

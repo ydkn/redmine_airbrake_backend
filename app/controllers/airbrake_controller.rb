@@ -25,20 +25,23 @@ class AirbrakeController < ::ApplicationController
 
     custom_field_values = {}
 
+    # Error hash
+    custom_field_values[notice_hash_field.id] = notice_hash if @issue.new_record?
+
     # Update occurrences
     occurrences_value = @issue.custom_value_for(occurrences_field.id)
     custom_field_values[occurrences_field.id] = ((occurrences_value ? occurrences_value.value.to_i : 0) + 1).to_s if occurrences_field.present?
 
+    @issue.custom_field_values = custom_field_values
+
     # Reopen if closed
     if reopen? && @issue.status.is_closed?
+      desc = "*Issue reopened after occurring again in _#{@notice.env[:environment_name]}_ environment.*"
+      desc << "\n\n#{render_description}" if project_setting(:reopen_repeat_description)
+
       @issue.status = IssueStatus.where(is_default: true).order(:position).first
-      @issue.init_journal(User.current, "Issue reopened after occurring again in environment #{@notice.env[:environment_name]}")
+      @issue.init_journal(User.current, desc)
     end
-
-    # Hash
-    custom_field_values[notice_hash_field.id] = notice_hash if @issue.new_record?
-
-    @issue.custom_field_values = custom_field_values
 
     if @issue.save
       render xml: {
