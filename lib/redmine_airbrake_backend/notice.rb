@@ -39,7 +39,7 @@ module RedmineAirbrakeBackend
       error[:backtrace] = format_backtrace(error[:backtrace])
 
       request = convert_element(notice.at('request'))
-      if request[:session].present?
+      if request.present? && request[:session].present?
         request[:session][:log] = request[:session][:log].present? ? format_session_log(request[:session][:log]) : nil
       end
 
