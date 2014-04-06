@@ -1,6 +1,7 @@
 require 'redmine_airbrake_backend/notice'
 
 class AirbrakeController < ::ApplicationController
+  protect_from_forgery except: :notice
   prepend_before_filter :parse_notice_and_api_auth
   before_filter :load_records
 
@@ -29,8 +30,10 @@ class AirbrakeController < ::ApplicationController
     custom_field_values[notice_hash_field.id] = notice_hash if @issue.new_record?
 
     # Update occurrences
-    occurrences_value = @issue.custom_value_for(occurrences_field.id)
-    custom_field_values[occurrences_field.id] = ((occurrences_value ? occurrences_value.value.to_i : 0) + 1).to_s if occurrences_field.present?
+    if occurrences_field.present?
+      occurrences_value = @issue.custom_value_for(occurrences_field.id)
+      custom_field_values[occurrences_field.id] = ((occurrences_value ? occurrences_value.value.to_i : 0) + 1).to_s
+    end
 
     @issue.custom_field_values = custom_field_values
 
@@ -67,13 +70,19 @@ class AirbrakeController < ::ApplicationController
   def load_records
     # Project
     unless @project = Project.where(identifier: @notice.params[:project]).first
-      render nothing: true, status: :bad_request
+      render text: 'Project not found!', status: :bad_request
+      return
+    end
+
+    # Check configuration
+    if notice_hash_field.blank?
+      render text: 'Custom field for notice hash is not configured!', status: :internal_server_error
       return
     end
 
     # Tracker
     unless (@tracker = record_for(@project.trackers, :tracker)) && @tracker.custom_fields.where(id: notice_hash_field.id).first
-      render nothing: true, status: :bad_request
+      render text: 'Tracker not found!', status: :bad_request
       return
     end
 
