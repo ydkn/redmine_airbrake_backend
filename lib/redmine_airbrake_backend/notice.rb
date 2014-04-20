@@ -52,11 +52,8 @@ module RedmineAirbrakeBackend
 
     def self.convert_element(elem)
       return nil if elem.nil?
-
       return elem.children.first.inner_text if !elem.children.nil? && elem.children.count == 1 && elem.children.first.is_a?(Hpricot::Text)
-
       return elem.attributes.to_hash.symbolize_keys if elem.children.nil?
-
       return convert_var_elements(elem.children) if elem.children.count == elem.children.select{|c| c.name == 'var'}.count
 
       h = {}
