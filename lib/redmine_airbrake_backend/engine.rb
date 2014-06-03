@@ -40,7 +40,7 @@ module RedmineAirbrakeBackend
         directory        RedmineAirbrakeBackend.directory
 
         project_module :airbrake do
-          permission :manage_airbrake, {airbrake: [:update]}
+          permission :manage_airbrake, { airbrake: [:update] }
         end
 
         settings default: { hash_field: '', occurrences_field: '' }, partial: 'settings/airbrake'

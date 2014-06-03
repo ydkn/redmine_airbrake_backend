@@ -71,7 +71,7 @@ module RedmineAirbrakeBackend
           h[key] = convert_element(e)
         end
       end
-      h.delete_if{|k,v| k.strip.blank?}
+      h.delete_if { |k,v| k.strip.blank? }
       h.symbolize_keys
     end
 
@@ -80,7 +80,7 @@ module RedmineAirbrakeBackend
       elements.each do |elem|
         vars[format_hash_key(elem.attributes['key'])] = elem.inner_text
       end
-      vars.delete_if{|k,v| k.strip.blank?}
+      vars.delete_if { |k,v| k.strip.blank? }
       vars.symbolize_keys
     end
 
@@ -92,7 +92,7 @@ module RedmineAirbrakeBackend
       return nil if data.blank?
 
       d = (data.is_a?(Array) ? data : [data]).compact
-      d.reject!{|e| !e.is_a?(Hash)}
+      d.reject! { |e| !e.is_a?(Hash) }
       d.blank? ? nil : d
     end
 
@@ -102,10 +102,12 @@ module RedmineAirbrakeBackend
 
     def self.format_session_log(log)
       log = JSON.parse(log) rescue nil
-      return nil unless log = ensure_hash_array(log)
 
-      log.map!{|l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l}
-      log.reject!{|l| l[:time].blank?}
+      log = ensure_hash_array(log)
+      return nil if log.blank?
+
+      log.map! { |l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l }
+      log.reject! { |l| l[:time].blank? }
 
       log.blank? ? nil : log
     end
