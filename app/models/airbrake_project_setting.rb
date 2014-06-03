@@ -1,5 +1,6 @@
 require 'redmine/safe_attributes'
 
+# Project-specific settings for airbrake
 class AirbrakeProjectSetting < ActiveRecord::Base
   include Redmine::SafeAttributes
 

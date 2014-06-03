@@ -1,4 +1,5 @@
 module AirbrakeHelper
+  # Wiki markup for a table
   def format_table(data)
     lines = []
     data.each do |key, value|
@@ -8,6 +9,7 @@ module AirbrakeHelper
     lines.join("\n")
   end
 
+  # Wiki markup for logs
   def format_log(data)
     lines = []
     data.each do |log|
@@ -17,12 +19,14 @@ module AirbrakeHelper
     lines.join("\n")
   end
 
+  # Wiki markup for a list item
   def format_list_item(name, value)
     return '' if value.blank?
 
     "* *#{name}:* #{value}"
   end
 
+  # Wiki markup for backtrace element with link to repository if possible
   def format_backtrace_element(element)
     @htmlentities ||= HTMLEntities.new
 
