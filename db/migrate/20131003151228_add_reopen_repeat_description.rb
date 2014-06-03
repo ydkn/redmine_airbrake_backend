@@ -1,5 +1,4 @@
 class AddReopenRepeatDescription < ActiveRecord::Migration
-
   def up
     add_column :airbrake_project_settings, :reopen_repeat_description, :boolean
 
@@ -16,5 +15,4 @@ class AddReopenRepeatDescription < ActiveRecord::Migration
   def down
     remove_column :airbrake_project_settings, :reopen_repeat_description
   end
-
 end

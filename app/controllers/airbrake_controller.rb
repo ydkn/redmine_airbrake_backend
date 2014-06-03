@@ -1,5 +1,6 @@
 require 'redmine_airbrake_backend/notice'
 
+# Controller for airbrake notices
 class AirbrakeController < ::ApplicationController
   protect_from_forgery except: :notice
   prepend_before_filter :parse_notice_and_api_auth
@@ -7,6 +8,7 @@ class AirbrakeController < ::ApplicationController
 
   accept_api_auth :notice
 
+  # Handle airbrake notices
   def notice
     return unless authorize(:issues, :create)
 
@@ -101,7 +103,7 @@ class AirbrakeController < ::ApplicationController
     @assignee = record_for(@project.users, :assignee, [:id, :login])
   end
 
-  def record_for(on, param_key, fields=[:id, :name])
+  def record_for(on, param_key, fields = [:id, :name])
     fields.each do |field|
       val = on.where(field => @notice.params[param_key]).first
       return val if val.present?
@@ -166,11 +168,10 @@ class AirbrakeController < ::ApplicationController
   end
 
   def render_description
-    if template_exists?("issue_description_#{@notice.params[:type]}", 'airbrake', true)
-      render_to_string(partial: "issue_description_#{@notice.params[:type]}")
+    if template_exists?("airbrake/issue_description/#{@notice.params[:type]}")
+      render_to_string("airbrake/issue_description/#{@notice.params[:type]}", layout: false)
     else
-      render_to_string(partial: 'issue_description')
+      render_to_string('airbrake/issue_description/default', layout: false)
     end
   end
-
 end

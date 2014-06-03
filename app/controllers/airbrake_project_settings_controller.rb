@@ -1,3 +1,4 @@
+# Controller for project-specific airbrake settings
 class AirbrakeProjectSettingsController < ::ApplicationController
   before_filter :find_project
   before_filter :find_airbrake_setting
@@ -7,9 +8,10 @@ class AirbrakeProjectSettingsController < ::ApplicationController
   def update
     @airbrake_project_setting.safe_attributes = params[:airbrake_project_setting]
 
-    @airbrake_project_setting.save
+    if @airbrake_project_setting.save
+      flash[:notice] = l(:notice_successful_update)
+    end
 
-    flash[:notice] = l(:notice_successful_update)
     redirect_to settings_project_path(@project, tab: 'airbrake')
   end
 
@@ -22,5 +24,4 @@ class AirbrakeProjectSettingsController < ::ApplicationController
   def find_airbrake_setting
     @airbrake_project_setting = @project.airbrake_settings || AirbrakeProjectSetting.new(project: @project)
   end
-
 end

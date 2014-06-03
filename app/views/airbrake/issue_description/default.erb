@@ -3,7 +3,7 @@ h1. <%= @notice.error[:message] %>
 <% if @notice.error.present? && @notice.error[:backtrace].present? %>
 h2. Stacktrace:
 
-p((. <%=raw @notice.error[:backtrace].collect{|e| format_backtrace_element(e)}.join("\n") %>
+p((. <%=raw @notice.error[:backtrace].collect { |e| format_backtrace_element(e) }.join("\n") %>
 <% end %>
 
 <% if @notice.request.present? %>

@@ -30,20 +30,20 @@ module RedmineAirbrakeBackend
 
     def register_redmine_plugin
       Redmine::Plugin.register :redmine_airbrake_backend do
-        name 'Airbrake Backend'
-        author 'Florian Schwab'
-        author_url 'https://github.com/ydkn'
-        description 'Airbrake Backend for Redmine'
-        url 'https://github.com/ydkn/redmine_airbrake_backend'
-        version ::RedmineAirbrakeBackend::VERSION
-        requires_redmine :version_or_higher => '2.3.2'
-        directory RedmineAirbrakeBackend.directory
+        name             'Airbrake Backend'
+        author           'Florian Schwab'
+        author_url       'https://github.com/ydkn'
+        description      'Airbrake Backend for Redmine'
+        url              'https://github.com/ydkn/redmine_airbrake_backend'
+        version          ::RedmineAirbrakeBackend::VERSION
+        requires_redmine version_or_higher: '2.4.0'
+        directory        RedmineAirbrakeBackend.directory
 
         project_module :airbrake do
           permission :manage_airbrake, {airbrake: [:update]}
         end
 
-        settings default: {hash_field: '', occurrences_field: ''}, partial: 'settings/airbrake'
+        settings default: { hash_field: '', occurrences_field: '' }, partial: 'settings/airbrake'
       end
     end
   end

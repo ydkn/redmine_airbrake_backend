@@ -1,5 +1,4 @@
 class CreateAirbrakeProjectSettings < ActiveRecord::Migration
-
   def up
     create_table :airbrake_project_settings do |t|
       t.references :project, index: true, null: false
@@ -14,5 +13,4 @@ class CreateAirbrakeProjectSettings < ActiveRecord::Migration
   def down
     drop_table :airbrake_project_settings
   end
-
 end

@@ -15,7 +15,7 @@ module RedmineAirbrakeBackend
       @version = version
 
       @notifier = options.delete(:notifier)
-      @params   = options.delete(:params
+      @params   = options.delete(:params)
       @error    = options.delete(:error)
       @request  = options.delete(:request)
       @env      = options.delete(:env)
