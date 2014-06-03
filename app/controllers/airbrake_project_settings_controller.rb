@@ -10,7 +10,7 @@ class AirbrakeProjectSettingsController < ::ApplicationController
     @airbrake_project_setting.save
 
     flash[:notice] = l(:notice_successful_update)
-    redirect_to settings_project_path(@project, :tab => 'airbrake')
+    redirect_to settings_project_path(@project, tab: 'airbrake')
   end
 
   private

@@ -1,7 +1,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class NoticeTest < ActiveSupport::TestCase
-
   test 'parse' do
     api_key = {
       api_key: 'foobar',
@@ -48,7 +47,6 @@ class NoticeTest < ActiveSupport::TestCase
   private
 
   def prepare_xml(xml_data)
-    xml_data.split("\n").map{|l| l.strip}.join('')
+    xml_data.split("\n").map { |l| l.strip }.join('')
   end
-
 end

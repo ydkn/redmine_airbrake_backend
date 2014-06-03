@@ -11,29 +11,34 @@ module RedmineAirbrakeBackend
 
     attr_reader :version, :params, :notifier, :error, :request, :env
 
-    def initialize(version, params, notifier, options={})
+    def initialize(version, options = {})
       @version = version
-      @params = params
-      @notifier = notifier
 
-      @error = options.delete(:error)
-      @request = options.delete(:request)
-      @env = options.delete(:env)
+      @notifier = options.delete(:notifier)
+      @params   = options.delete(:params
+      @error    = options.delete(:error)
+      @request  = options.delete(:request)
+      @env      = options.delete(:env)
     end
 
     def self.parse(xml_data)
       doc = Hpricot::XML(xml_data)
 
-      raise NoticeInvalid if (notice = doc.at('notice')).blank?
-      raise NoticeInvalid.new('no version') if (version = notice.attributes['version']).blank?
+      notice = doc.at('notice')
+      raise NoticeInvalid if notice.blank?
+
+      version = notice.attributes['version']
+      raise NoticeInvalid.new('no version') if version.blank?
       raise UnsupportedVersion.new(version) unless SUPPORTED_API_VERSIONS.include?(version)
 
       params = JSON.parse(notice.at('api-key').inner_text).symbolize_keys rescue nil
       raise NoticeInvalid.new('no or invalid api-key') if params.blank?
 
-      raise NoticeInvalid.new('no notifier') if (notifier = convert_element(notice.at('notifier'))).blank?
+      notifier = convert_element(notice.at('notifier'))
+      raise NoticeInvalid.new('no notifier') if notifier.blank?
 
-      raise NoticeInvalid.new('no error') if (error = convert_element(notice.at('error'))).blank?
+      error = convert_element(notice.at('error'))
+      raise NoticeInvalid.new('no error')   if error.blank?
       raise NoticeInvalid.new('no message') if error[:message].blank?
 
       error[:backtrace] = format_backtrace(error[:backtrace])
@@ -45,7 +50,7 @@ module RedmineAirbrakeBackend
 
       env = convert_element(notice.at('server-environment'))
 
-      new(version, params, notifier, error: error, request: request, env: env)
+      new(version, params: params, notifier: notifier, error: error, request: request, env: env)
     end
 
     private
@@ -104,6 +109,5 @@ module RedmineAirbrakeBackend
 
       log.blank? ? nil : log
     end
-
   end
 end

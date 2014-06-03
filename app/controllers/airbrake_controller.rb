@@ -10,19 +10,7 @@ class AirbrakeController < ::ApplicationController
   def notice
     return unless authorize(:issues, :create)
 
-    # Issue by project, tracker and hash
-    issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice_hash).select([:customized_id]).collect{|cv| cv.customized_id}
-    @issue = Issue.where(id: issue_ids, project_id: @project.id, tracker_id: @tracker.id).first
-    @issue = Issue.new(
-        subject: subject,
-        project: @project,
-        tracker: @tracker,
-        author: User.current,
-        category: @category,
-        priority: @priority,
-        description: render_description,
-        assigned_to: @assignee
-      ) unless @issue
+    load_or_initialize_issue
 
     custom_field_values = {}
 
@@ -65,6 +53,23 @@ class AirbrakeController < ::ApplicationController
     params[:key] = @notice.params[:api_key]
   rescue RedmineAirbrakeBackend::Notice::NoticeInvalid, RedmineAirbrakeBackend::Notice::UnsupportedVersion
     render nothing: true, status: :bad_request
+  end
+
+  # Load or initialize issue by project, tracker and airbrake hash
+  def load_or_initialize_issue
+    issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice_hash).pluck(:customized_id)
+
+    @issue = Issue.where(id: issue_ids, project_id: @project.id, tracker_id: @tracker.id).first
+    @issue = Issue.new(
+        subject: subject,
+        project: @project,
+        tracker: @tracker,
+        author: User.current,
+        category: @category,
+        priority: @priority,
+        description: render_description,
+        assigned_to: @assignee
+      ) unless @issue
   end
 
   def load_records
@@ -131,7 +136,7 @@ class AirbrakeController < ::ApplicationController
 
   def normalized_backtrace
     if @notice.error.present? && @notice.error[:backtrace].present?
-      @notice.error[:backtrace].collect do |e|
+      @notice.error[:backtrace].map do |e|
         "#{e[:file]}|#{e[:method].gsub(/_\d+_/, '')}|#{e[:number]}" rescue nil
       end.compact
     else

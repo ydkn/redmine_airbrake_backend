@@ -11,14 +11,14 @@ module RedmineAirbrakeBackend::Patches
     def project_settings_tabs_with_airbrake_backend_tab
       tabs = project_settings_tabs_without_airbrake_backend_tab
 
-      tabs.push({
-          :name => 'airbrake',
-          :action => :manage_airbrake,
-          :partial => 'projects/settings/airbrake',
-          :label => :project_module_airbrake
-        })
+      tabs.push(
+          name:    'airbrake',
+          action:  :manage_airbrake,
+          partial: 'projects/settings/airbrake',
+          label:   :project_module_airbrake
+        )
 
-      tabs.select{|tab| User.current.allowed_to?(tab[:action], @project)}
+      tabs.select { |tab| User.current.allowed_to?(tab[:action], @project) }
     end
   end
 end
