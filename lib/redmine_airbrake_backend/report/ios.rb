@@ -1,7 +1,9 @@
 module RedmineAirbrakeBackend
-  # Represents a report contained in a notice
+  # Represents a report contained in a request
   class Report
+    # iOS report
     class Ios
+      # Parse an iOS crash log
       def self.parse(data)
         error = {
           backtrace:   [],
@@ -14,9 +16,7 @@ module RedmineAirbrakeBackend
         indicent_identifier  = nil
 
         data.split("\n").each do |line|
-          if line =~ /^(Application Specific Information|Last Exception Backtrace|Thread \d+( Crashed)?):$/
-            header_finished = true
-          end
+          header_finished = true if line =~ /^(Application Specific Information|Last Exception Backtrace|Thread \d+( Crashed)?):$/
 
           unless header_finished
             key, value = line.split(':', 2)
@@ -40,9 +40,7 @@ module RedmineAirbrakeBackend
             end
           end
 
-          if line =~ /^Thread \d+:$/
-            crashed_thread = false
-          end
+          crashed_thread = false if line =~ /^Thread \d+:$/
 
           if crashed_thread
             if line =~ /^(\d+)\s+([^\s]+)\s+(0x[0-9a-f]+)\s+(.+) \+ (\d+)$/
@@ -54,13 +52,9 @@ module RedmineAirbrakeBackend
             end
           end
 
-          if error[:backtrace].blank? && line =~ /^(Last Exception Backtrace|Thread \d+ Crashed):$/
-            crashed_thread = true
-          end
+          crashed_thread = true if error[:backtrace].blank? && line =~ /^(Last Exception Backtrace|Thread \d+ Crashed):$/
 
-          if line =~ /^Application Specific Information:$/
-            next_line_is_message = true
-          end
+          next_line_is_message = true if line =~ /^Application Specific Information:$/
         end
 
         return nil if error.blank?

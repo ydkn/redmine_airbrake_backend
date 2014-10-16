@@ -66,8 +66,6 @@ class AirbrakeController < ::ApplicationController
 
     return issue if issue.present?
 
-    puts render_description(error).inspect
-
     issue = Issue.new(
       subject: error.subject,
       project: @request.project,

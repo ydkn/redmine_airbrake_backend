@@ -6,9 +6,8 @@ class AirbrakeReportController < ::AirbrakeController
 
   # Handle airbrake reports
   def report
-    # TODO
     render json: {
-      notice: {
+      report: {
         id: (@results.first[:hash] rescue nil)
       }
     }

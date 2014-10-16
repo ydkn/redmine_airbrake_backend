@@ -94,7 +94,7 @@ module RedmineAirbrakeBackend
 
     private
 
-    def record_for(on, config_key, fields = [ :id, :name ])
+    def record_for(on, config_key, fields = [:id, :name])
       fields.each do |field|
         val = on.where(field => @config[config_key]).first
         return val if val.present?

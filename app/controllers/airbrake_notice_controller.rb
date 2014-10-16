@@ -16,7 +16,6 @@ class AirbrakeNoticeController < ::AirbrakeController
 
   # Handle airbrake JSON notices
   def notice_json
-    # TODO notice structure
     render json: {
       notice: {
         id: (@results.first[:hash] rescue nil)

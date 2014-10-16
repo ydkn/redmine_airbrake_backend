@@ -8,6 +8,7 @@ module RedmineAirbrakeBackend::Patches
       alias_method_chain :project_settings_tabs, :airbrake_backend_tab
     end
 
+    # add airbrake tab to project settings
     def project_settings_tabs_with_airbrake_backend_tab
       tabs = project_settings_tabs_without_airbrake_backend_tab
 
