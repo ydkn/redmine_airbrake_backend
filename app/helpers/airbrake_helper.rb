@@ -66,10 +66,10 @@ module AirbrakeHelper
   def repositories_for_backtrace
     return @_bactrace_repositories unless @_bactrace_repositories.nil?
 
-    if request.repository.present?
-      @_bactrace_repositories = [request.repository]
+    if @request.repository.present?
+      @_bactrace_repositories = [@request.repository]
     else
-      @_bactrace_repositories = request.project.repositories.to_a
+      @_bactrace_repositories = @request.project.repositories.to_a
     end
 
     @_bactrace_repositories
