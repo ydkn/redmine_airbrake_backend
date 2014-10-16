@@ -1,3 +1,5 @@
+require 'htmlentities'
+
 module AirbrakeHelper
   # Wiki markup for a table
   def format_table(data)
@@ -33,7 +35,11 @@ module AirbrakeHelper
     repository = repository_for_backtrace_element(element)
 
     if repository.blank?
-      markup = "@#{@htmlentities.decode(element[:file])}:#{element[:number]}@"
+      if element[:number].blank?
+        markup = "@#{@htmlentities.decode(element[:file])}@"
+      else
+        markup = "@#{@htmlentities.decode(element[:file])}:#{element[:number]}@"
+      end
     else
       filename = @htmlentities.decode(filename_for_backtrace_element(element))
 
@@ -60,11 +66,10 @@ module AirbrakeHelper
   def repositories_for_backtrace
     return @_bactrace_repositories unless @_bactrace_repositories.nil?
 
-    if @notice.params.key?(:repository)
-      repo = @project.repositories.where(identifier: (@notice.params[:repository] || '')).first
-      @_bactrace_repositories = [repo] if repo.present?
+    if request.repository.present?
+      @_bactrace_repositories = [request.repository]
     else
-      @_bactrace_repositories = @project.repositories.to_a
+      @_bactrace_repositories = request.project.repositories.to_a
     end
 
     @_bactrace_repositories
