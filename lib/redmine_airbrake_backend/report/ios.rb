@@ -46,6 +46,8 @@ module RedmineAirbrakeBackend
             if line =~ /^\*\*\* Terminating app due to uncaught exception '([^']+)', reason: '\*\*\* (.*)'$/
               error[:type]    = Regexp.last_match(1)
               error[:message] = Regexp.last_match(2)
+            else
+              error[:message] = line
             end
           end
 
