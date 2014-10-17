@@ -7,7 +7,8 @@ module RedmineAirbrakeBackend
       def self.parse(data)
         error = {
           backtrace:   [],
-          attachments: []
+          attachments: [],
+          application: {}
         }
 
         header_finished      = false
@@ -19,14 +20,22 @@ module RedmineAirbrakeBackend
           header_finished = true if line =~ /^(Application Specific Information|Last Exception Backtrace|Thread \d+( Crashed)?):$/
 
           unless header_finished
-            key, value = line.split(':', 2)
+            key, value = line.split(':', 2).map { |s| s.strip }
 
             next if key.blank? || value.blank?
 
-            error[:type]    = value.strip if key.strip == 'Exception Type'
-            error[:message] = value.strip if key.strip == 'Exception Codes'
-
-            indicent_identifier = value.strip if key.strip == 'Incident Identifier'
+            case key
+            when 'Exception Type'
+              error[:type] = value
+            when 'Exception Codes'
+              error[:message] = value
+            when 'Incident Identifier'
+              indicent_identifier = value
+            when 'Identifier'
+              error[:application][:name] = value
+            when 'Version'
+              error[:application][:version] = value
+            end
           end
 
           if next_line_is_message

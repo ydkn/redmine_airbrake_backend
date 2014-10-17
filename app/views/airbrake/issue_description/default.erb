@@ -1,6 +1,13 @@
 <% if error.present? %>
 h1. <%= error.message %>
 
+<% if error.application.present? %>
+h2. Application:
+
+<%=format_list_item('Name', error.application[:name]) %>
+<%=format_list_item('Version', error.application[:version]) %>
+<% end %>
+
 <% if error.backtrace.present? %>
 h2. Stacktrace:
 

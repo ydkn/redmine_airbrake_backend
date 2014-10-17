@@ -5,7 +5,7 @@ module RedmineAirbrakeBackend
   class Error
     attr_accessor :request
     attr_reader :type, :message, :backtrace
-    attr_reader :airbrake_hash, :subject, :attachments
+    attr_reader :application, :airbrake_hash, :subject, :attachments
 
     def initialize(error_data)
       # Data
@@ -19,6 +19,9 @@ module RedmineAirbrakeBackend
 
       # Backtrace
       @backtrace = @data[:backtrace]
+
+      # Application
+      @application = @data[:application]
 
       # Attachments
       @attachments = @data[:attachments]

@@ -24,6 +24,7 @@ module RedmineAirbrakeBackend
       # Project
       @project = Project.where(identifier: @config[:project]).first
       raise Invalid.new('No or invalid project') if @project.blank?
+      raise Invalid.new('Airbrake not enabled for project') if @project.enabled_modules.where(name: :airbrake).empty?
 
       # Check configuration
       raise Invalid.new('Custom field for notice hash is not configured!') if notice_hash_field.blank?
