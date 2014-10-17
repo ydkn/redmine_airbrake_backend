@@ -58,7 +58,7 @@ module RedmineAirbrakeBackend
               error[:backtrace] << {
                 file:   Regexp.last_match(2),
                 method: Regexp.last_match(4),
-                line:   Regexp.last_match(5),
+                number: Regexp.last_match(5),
               }
             end
           end
