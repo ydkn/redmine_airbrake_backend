@@ -18,11 +18,11 @@ And then execute:
 ## Integration
 
 1. Create the following custom fields for issues:
-  * Airbrake Hash (String)
+  * Airbrake Hash (String) (required)
   * Number of Occurrences (Integer) (optional)
 2. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Configure)
 3. Enable the project module (Airbrake) in your project settings
-4. Configure additionale defaults under the settings tab (Airbrake)
+4. Configure additional defaults under the settings tab (Airbrake)
 
 ## Client configuration
 
