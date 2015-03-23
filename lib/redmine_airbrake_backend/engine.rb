@@ -8,11 +8,11 @@ module RedmineAirbrakeBackend
 
     initializer 'redmine_airbrake_backend.apply_patches', after: 'redmine_airbrake_backend.register_redmine_plugin' do |app|
       ActionDispatch::Callbacks.to_prepare do
-        require_dependency 'redmine_airbrake_backend/patches/project'
-        require_dependency 'redmine_airbrake_backend/patches/tracker'
-        require_dependency 'redmine_airbrake_backend/patches/issue_category'
-        require_dependency 'redmine_airbrake_backend/patches/issue_priority'
-        require_dependency 'redmine_airbrake_backend/patches/projects_helper'
+        require_dependency 'redmine_airbrake_backend/patches/project' unless defined?(RedmineAirbrakeBackend::Patches::Project)
+        require_dependency 'redmine_airbrake_backend/patches/tracker' unless defined?(RedmineAirbrakeBackend::Patches::Tracker)
+        require_dependency 'redmine_airbrake_backend/patches/issue_category' unless defined?(RedmineAirbrakeBackend::Patches::IssueCategory)
+        require_dependency 'redmine_airbrake_backend/patches/issue_priority' unless defined?(RedmineAirbrakeBackend::Patches::IssuePriority)
+        require_dependency 'redmine_airbrake_backend/patches/projects_helper' unless defined?(RedmineAirbrakeBackend::Patches::ProjectsHelper)
 
         RedmineAirbrakeBackend::Engine.apply_patch(Project, RedmineAirbrakeBackend::Patches::Project)
         RedmineAirbrakeBackend::Engine.apply_patch(Tracker, RedmineAirbrakeBackend::Patches::Tracker)

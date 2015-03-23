@@ -6,7 +6,11 @@ class AirbrakeProjectSettingsController < ::ApplicationController
   menu_item :settings
 
   def update
-    @airbrake_project_setting.safe_attributes = params[:airbrake_project_setting]
+    @airbrake_project_setting.tracker_id                = params[:airbrake_project_setting][:tracker_id]
+    @airbrake_project_setting.category_id               = params[:airbrake_project_setting][:category_id]
+    @airbrake_project_setting.priority_id               = params[:airbrake_project_setting][:priority_id]
+    @airbrake_project_setting.reopen_regexp             = params[:airbrake_project_setting][:reopen_regexp]
+    @airbrake_project_setting.reopen_repeat_description = params[:airbrake_project_setting][:reopen_repeat_description]
 
     if @airbrake_project_setting.save
       flash[:notice] = l(:notice_successful_update)
@@ -22,6 +26,7 @@ class AirbrakeProjectSettingsController < ::ApplicationController
   end
 
   def find_airbrake_setting
-    @airbrake_project_setting = @project.airbrake_settings || AirbrakeProjectSetting.new(project: @project)
+    @airbrake_project_setting = @project.airbrake_settings || AirbrakeProjectSetting.new
+    @airbrake_project_setting.project = @project
   end
 end
