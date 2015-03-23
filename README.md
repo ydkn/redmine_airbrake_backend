@@ -1,3 +1,7 @@
+[![Gem Version](https://img.shields.io/gem/v/redmine_airbrake_backend.svg)](https://rubygems.org/gems/redmine_airbrake_backend)
+[![Dependencies](https://img.shields.io/gemnasium/ydkn/redmine_airbrake_backend.svg)](https://gemnasium.com/ydkn/redmine_airbrake_backend)
+[![Code Climate](https://img.shields.io/codeclimate/github/ydkn/redmine_airbrake_backend.svg)](https://codeclimate.com/github/ydkn/redmine_airbrake_backend)
+
 # Redmine Airbrake Backend
 
 This plugin provides the necessary API to use Redmine as an Airbrake backend.
@@ -7,27 +11,33 @@ This plugin provides the necessary API to use Redmine as an Airbrake backend.
 Apply this [patch](http://www.redmine.org/issues/14402) to Redmine.
 
 Add this line to your Redmine Gemfile:
-
-    gem 'redmine_airbrake_backend'
+```ruby
+gem 'redmine_airbrake_backend'
+```
 
 And then execute:
-
-    $ bundle install
-    $ rake redmine:plugins:migrate
+```
+$ bundle install
+$ rake redmine:plugins:migrate
+```
 
 ## Integration
 
 1. Create the following custom fields for issues:
-  * Airbrake Hash (String) (required)
-  * Number of Occurrences (Integer) (optional)
-2. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Configure)
-3. Enable the project module (Airbrake) in your project settings
+  * Airbrake hash (String) (required)
+  * Number of occurrences (Integer) (optional)
+2. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Airbrake -> Configure)
+3. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake hash field to your project)
 4. Configure additional defaults under the settings tab (Airbrake)
 
 ## Client configuration
 
-For a Rails application, just setup the [Airbrake notifier](https://github.com/airbrake/airbrake) as usual, then modify `config/initializers/airbrake.rb` according to your needs using this template:
+For a Rails application add the airbrake gem to your Gemfile:
+```ruby
+gem 'airbrake'
+```
 
+And configure it, e.g. with a initializer `config/initializers/airbrake.rb`:
 ```ruby
 Airbrake.configure do |config|
   config.api_key = {
@@ -47,12 +57,6 @@ end
 ## Notes
 
 Based on https://github.com/milgner/redmine_airbrake_server
-
-## Code Status
-
-* [![Gem Version](https://badge.fury.io/rb/redmine_airbrake_backend.png)](http://badge.fury.io/rb/redmine_airbrake_backend)
-* [![Dependencies](https://gemnasium.com/ydkn/redmine_airbrake_backend.png?travis)](https://gemnasium.com/ydkn/redmine_airbrake_backend)
-* [![Code Climate](https://codeclimate.com/github/ydkn/redmine_airbrake_backend.png)](https://codeclimate.com/github/ydkn/redmine_airbrake_backend)
 
 ## Contributing
 
