@@ -23,12 +23,13 @@ $ rake redmine:plugins:migrate
 
 ## Integration
 
-1. Create the following custom fields for issues:
+1. Enable REST web service authentication
+2. Create the following custom fields for issues:
   * Airbrake hash (String) (required)
   * Number of occurrences (Integer) (optional)
-2. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Airbrake -> Configure)
-3. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake hash field to your project)
-4. Configure additional defaults under the settings tab (Airbrake)
+3. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Airbrake -> Configure)
+4. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake hash field to your project)
+5. Configure additional defaults under the settings tab (Airbrake)
 
 ## Client configuration
 
