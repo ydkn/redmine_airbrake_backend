@@ -1,5 +1,5 @@
 require 'json'
-require 'hpricot'
+require 'nokogiri'
 require 'redmine_airbrake_backend/request'
 
 module RedmineAirbrakeBackend
@@ -13,25 +13,25 @@ module RedmineAirbrakeBackend
 
       # Creates a notice from an airbrake xml request
       def self.parse(xml_data)
-        doc = Hpricot::XML(xml_data) rescue nil
+        doc = Nokogiri::XML(xml_data) rescue nil
         raise Invalid if doc.blank?
 
-        notice = doc.at('notice')
+        notice = doc.at('//notice')
         raise Invalid if notice.blank?
 
         # Version
         version = notice.attributes['version']
-        raise Invalid.new('No version') if version.blank?
-        raise UnsupportedVersion.new(version) unless SUPPORTED_API_VERSIONS.include?(version)
+        raise Invalid.new('No version') if version.blank? || version.value.blank?
+        raise UnsupportedVersion.new(version) unless SUPPORTED_API_VERSIONS.include?(version.value)
 
         error_data = parse_error(notice)
         raise Invalid.new('No error found') if error_data.blank?
         error = RedmineAirbrakeBackend::Error.new(error_data)
 
-        notifier = convert_element(notice.at('notifier'))
+        notifier = convert_element(notice.at('//notifier'))
         request  = parse_request(notice)
-        env      = convert_element(notice.at('server-environment'))
-        config   = notice.at('api-key').inner_text
+        env      = convert_element(notice.at('//server-environment'))
+        config   = notice.at('//api-key').inner_text
 
         new(config, notifier: notifier, errors: [error], request: request, env: env)
       end
@@ -39,7 +39,7 @@ module RedmineAirbrakeBackend
       private
 
       def self.parse_error(notice_doc)
-        error = convert_element(notice_doc.at('error'))
+        error = convert_element(notice_doc.at('//error'))
 
         # map class to type
         error[:type] ||= error[:class]
@@ -51,22 +51,18 @@ module RedmineAirbrakeBackend
       end
 
       def self.parse_request(notice_doc)
-        request = convert_element(notice_doc.at('request'))
-
-        if request.present? && request[:session].present?
-          request[:session][:log] = request[:session][:log].present? ? format_session_log(request[:session][:log]) : nil
-        end
-
-        request
+        convert_element(notice_doc.at('//request'))
       end
 
       def self.convert_element(elem)
         return nil if elem.nil?
-        return elem.children.first.inner_text if !elem.children.nil? && elem.children.count == 1 && elem.children.first.is_a?(Hpricot::Text)
-        return elem.attributes.to_hash.symbolize_keys if elem.children.nil?
+
+        return elem.children.first.inner_text if elem.children.count == 1 && elem.children.first.is_a?(Nokogiri::XML::Text)
+        return convert_attributes(elem.attributes) if elem.children.blank?
         return convert_var_elements(elem.children) if elem.children.count == elem.children.select { |c| c.name == 'var' }.count
 
         h = {}
+
         elem.children.each do |e|
           key = format_hash_key(e.name)
           if h.key?(key)
@@ -76,7 +72,9 @@ module RedmineAirbrakeBackend
             h[key] = convert_element(e)
           end
         end
+
         h.delete_if { |k, v| k.strip.blank? }
+
         h.symbolize_keys
       end
 
@@ -93,6 +91,16 @@ module RedmineAirbrakeBackend
         key.to_s.gsub(/-/, '_')
       end
 
+      def self.convert_attributes(attributes)
+        attrs = {}
+
+        attributes.each do |k, v|
+          attrs[k] = v.value
+        end
+
+        attrs.symbolize_keys
+      end
+
       def self.ensure_hash_array(data)
         return nil if data.blank?
 
@@ -103,18 +111,6 @@ module RedmineAirbrakeBackend
 
       def self.format_backtrace(backtrace)
         ensure_hash_array(backtrace).first[:line] rescue nil
-      end
-
-      def self.format_session_log(log)
-        log = ::JSON.parse(log) rescue nil
-
-        log = ensure_hash_array(log)
-        return nil if log.blank?
-
-        log.map! { |l| l.symbolize_keys!; l[:time] = (Time.parse(l[:time]) rescue nil); l }
-        log.reject! { |l| l[:time].blank? }
-
-        log.blank? ? nil : log
       end
     end
   end

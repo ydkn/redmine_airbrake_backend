@@ -26,6 +26,8 @@ class AirbrakeController < ::ApplicationController
   end
 
   def parse_xml_request
+    request.body.rewind
+
     @request  = RedmineAirbrakeBackend::Request::XML.parse(request.body)
 
     params[:key] = @request.api_key

@@ -4,56 +4,47 @@ h1. <%= error.message %>
 <% if error.application.present? %>
 h2. Application:
 
-<%=format_list_item('Name', error.application[:name]) %>
-<%=format_list_item('Version', error.application[:version]) %>
+<%= format_list_item('Name', error.application[:name]) %>
+<%= format_list_item('Version', error.application[:version]) %>
 <% end %>
 
 <% if error.backtrace.present? %>
 h2. Stacktrace:
 
-p((. <%=raw error.backtrace.collect { |e| format_backtrace_element(e) }.join("\n") %>
+p((. <%= raw error.backtrace.collect { |e| format_backtrace_element(e) }.join("\n") %>
 <% end %>
 <% end %>
 
 <% if request.request.present? %>
 h2. Request:
 
-<%=format_list_item('URL', request.request[:url]) %>
-<%=format_list_item('Component', request.request[:component]) %>
-<%=format_list_item('Action', request.request[:action]) %>
+<%= format_list_item('URL', request.request[:url]) %>
+<%= format_list_item('Component', request.request[:component]) %>
+<%= format_list_item('Action', request.request[:action]) %>
 
 <% if request.request[:params].present? %>
 h2. Parameters:
 
-<%=format_table(request.request[:params]) %>
+<%= format_table(request.request[:params]) %>
 <% end %>
 
 <% if request.request[:cgi_data].present? %>
 h2. Headers:
 
-<%=format_table(request.request[:cgi_data]) %>
+<%= format_table(request.request[:cgi_data]) %>
 <% end %>
 
-<% log = request.request[:session].delete(:log) if request.request[:session].present? %>
 <% if request.request[:session].present? %>
 h2. Session:
 
-<%=format_table(request.request[:session]) %>
-<% end %>
-
-<% if log.present? %>
-h2. Log:
-
-<pre>
-<%=format_log(log) %>
-</pre>
+<%= format_table(request.request[:session]) %>
 <% end %>
 <% end %>
 
 <% if request.env.present? %>
 h2. Environment
 
-<%=format_list_item('Name', request.environment_name) %>
-<%=format_list_item('Directory', request.env[:project_root]) %>
-<%=format_list_item('Hostname', request.env[:hostname]) %>
+<%= format_list_item('Name', request.environment_name) %>
+<%= format_list_item('Directory', request.env[:project_root]) %>
+<%= format_list_item('Hostname', request.env[:hostname]) %>
 <% end %>

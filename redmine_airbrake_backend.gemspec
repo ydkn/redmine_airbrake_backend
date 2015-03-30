@@ -18,8 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'rails'
-  spec.add_dependency 'hpricot'
-  spec.add_dependency 'htmlentities'
+  spec.add_dependency 'nokogiri'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'

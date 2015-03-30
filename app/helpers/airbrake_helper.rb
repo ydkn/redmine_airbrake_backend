@@ -1,5 +1,3 @@
-require 'htmlentities'
-
 module AirbrakeHelper
   # Wiki markup for a table
   def format_table(data)
@@ -30,18 +28,16 @@ module AirbrakeHelper
 
   # Wiki markup for backtrace element with link to repository if possible
   def format_backtrace_element(element)
-    @htmlentities ||= HTMLEntities.new
-
     repository = repository_for_backtrace_element(element)
 
     if repository.blank?
       if element[:number].blank?
-        markup = "@#{@htmlentities.decode(element[:file])}@"
+        markup = "@#{element[:file]}@"
       else
-        markup = "@#{@htmlentities.decode(element[:file])}:#{element[:number]}@"
+        markup = "@#{element[:file]}:#{element[:number]}@"
       end
     else
-      filename = @htmlentities.decode(filename_for_backtrace_element(element))
+      filename = filename_for_backtrace_element(element)
 
       if repository.identifier.blank?
         markup = "source:\"#{filename}#L#{element[:number]}\""
@@ -50,7 +46,7 @@ module AirbrakeHelper
       end
     end
 
-    markup + " in ??<notextile>#{@htmlentities.decode(element[:method])}</notextile>??"
+    markup + " in ??<notextile>#{element[:method]}</notextile>??"
   end
 
   private

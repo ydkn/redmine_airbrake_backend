@@ -44,7 +44,7 @@ module RedmineAirbrakeBackend
         return nil if error_data.blank?
 
         error             = {}
-        error[:type]      = error_data[:type]
+        error[:type]      = secure_type(error_data[:type])
         error[:message]   = error_data[:message]
         error[:backtrace] = error_data[:backtrace].map do |backtrace_element|
           {
@@ -60,13 +60,19 @@ module RedmineAirbrakeBackend
       def self.parse_report(type, report_data)
         return nil if report_data.blank?
 
-        require "redmine_airbrake_backend/report/#{type}"
+        sec_type = secure_type(type)
 
-        clazz = "RedmineAirbrakeBackend::Report::#{type.to_s.camelize}".constantize rescue nil
+        require "redmine_airbrake_backend/report/#{sec_type}" rescue nil
+
+        clazz = "RedmineAirbrakeBackend::Report::#{sec_type.camelize}".constantize rescue nil
 
         return nil if clazz.blank?
 
         clazz.parse(report_data)
+      end
+
+      def self.secure_type(type)
+        type.to_s.gsub(/[^a-zA-Z0-9_-]/, '')
       end
     end
   end
