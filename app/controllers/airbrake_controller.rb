@@ -68,20 +68,24 @@ class AirbrakeController < ::ApplicationController
 
     return issue if issue.present?
 
-    issue = Issue.new(
-      subject: error.subject,
-      project: @request.project,
-      tracker: @request.tracker,
-      author: User.current,
-      category: @request.category,
-      priority: @request.priority,
-      description: render_description(error),
-      assigned_to: @request.assignee
-    )
+    issue = initialize_issue(error)
 
     add_error_attachments_to_issue(issue, error)
 
     issue
+  end
+
+  def initialize_issue(error)
+    Issue.new(
+        subject: error.subject,
+        project: @request.project,
+        tracker: @request.tracker,
+        author: User.current,
+        category: @request.category,
+        priority: @request.priority,
+        description: render_description(error),
+        assigned_to: @request.assignee
+      )
   end
 
   def set_custom_field_values(issue, request, airbrake_hash)

@@ -61,10 +61,17 @@ module RedmineAirbrakeBackend
         return convert_attributes(elem.attributes) if elem.children.blank?
         return convert_var_elements(elem.children) if elem.children.count == elem.children.select { |c| c.name == 'var' }.count
 
+        h = convert_children(elem)
+        h.delete_if { |k, v| k.strip.blank? }
+        h.symbolize_keys
+      end
+
+      def self.convert_children(elem)
         h = {}
 
         elem.children.each do |e|
           key = format_hash_key(e.name)
+
           if h.key?(key)
             h[key] = [h[key]] unless h[key].is_a?(Array)
             h[key] << convert_element(e)
@@ -73,9 +80,7 @@ module RedmineAirbrakeBackend
           end
         end
 
-        h.delete_if { |k, v| k.strip.blank? }
-
-        h.symbolize_keys
+        h
       end
 
       def self.convert_var_elements(elements)

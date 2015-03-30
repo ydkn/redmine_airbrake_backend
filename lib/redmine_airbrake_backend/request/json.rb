@@ -15,16 +15,9 @@ module RedmineAirbrakeBackend
         env      = parse_plain_section(parsed_json_data[:environment])
         config   = parsed_json_data[:key]
 
-        errors = []
-
-        (parsed_json_data[:errors] || []).each do |error_data|
-          error = parse_error(error_data)
-          errors << ::RedmineAirbrakeBackend::Error.new(error) if error.present?
-        end
-
-        report = parse_report(parsed_json_data[:type], parsed_json_data[:report])
-        errors << ::RedmineAirbrakeBackend::Error.new(report) if report.present?
-
+        errors  = []
+        errors += parse_errors(parsed_json_data[:errors])
+        errors += parse_report(parsed_json_data[:type], parsed_json_data[:report])
         errors.compact!
 
         raise Invalid.new('No error or report found') if errors.blank?
@@ -38,6 +31,17 @@ module RedmineAirbrakeBackend
         return {} if section_data.blank?
 
         section_data.symbolize_keys
+      end
+
+      def self.parse_errors(errors)
+        errors = []
+
+        (errors || []).each do |error_data|
+          error = parse_error(error_data)
+          errors << ::RedmineAirbrakeBackend::Error.new(error) if error.present?
+        end
+
+        errors
       end
 
       def self.parse_error(error_data)
@@ -68,7 +72,9 @@ module RedmineAirbrakeBackend
 
         return nil if clazz.blank?
 
-        clazz.parse(report_data)
+        report = clazz.parse(report_data)
+
+        report.present? ? ::RedmineAirbrakeBackend::Error.new(report) : nil
       end
 
       def self.secure_type(type)
