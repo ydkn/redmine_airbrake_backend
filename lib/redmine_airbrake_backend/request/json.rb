@@ -17,7 +17,7 @@ module RedmineAirbrakeBackend
 
         errors  = []
         errors += parse_errors(parsed_json_data[:errors])
-        errors += parse_report(parsed_json_data[:type], parsed_json_data[:report])
+        errors << parse_report(parsed_json_data[:type], parsed_json_data[:report])
         errors.compact!
 
         raise Invalid.new('No error or report found') if errors.blank?
