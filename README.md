@@ -8,6 +8,10 @@ This plugin provides the necessary API to use Redmine as an Airbrake backend.
 
 ## Installation
 
+Please see http://www.redmine.org/projects/redmine/wiki/Plugins for installation instructions.
+
+### Alternate installation
+
 Apply this [patch](http://www.redmine.org/issues/14402) to Redmine.
 
 Add this line to your Redmine Gemfile:
