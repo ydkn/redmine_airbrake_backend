@@ -50,8 +50,8 @@ Airbrake.configure do |config|
       api_key: 'redmine_api_key',               # the api key for a user which has permission to create issues in the project specified in the previous step
       tracker: 'Bug',                           # the name or id of your desired tracker (optional if default is configured)
       category: 'Development',                  # the name or id of a ticket category, optional
-      priority: 5                               # the name or id of the priority for new tickets, optional.
-      assignee: 'admin',                        # the login or id of a user the ticket should get assigned to by default, optional
+      priority: 5,                              # the name or id of the priority for new tickets, optional.
+      assignee: 'admin'                         # the login or id of a user the ticket should get assigned to by default, optional
     }.to_json
   config.host = 'my_redmine_host.com'           # the hostname your Redmine runs at
   config.port = 443                             # the port your Redmine runs at
