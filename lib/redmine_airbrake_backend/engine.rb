@@ -36,7 +36,7 @@ module RedmineAirbrakeBackend
         description      'Airbrake Backend for Redmine'
         url              'https://github.com/ydkn/redmine_airbrake_backend'
         version          ::RedmineAirbrakeBackend::VERSION
-        requires_redmine version_or_higher: '2.4.0'
+        requires_redmine version_or_higher: '3.1.0'
         directory        RedmineAirbrakeBackend.directory
 
         project_module :airbrake do
