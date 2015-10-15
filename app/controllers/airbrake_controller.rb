@@ -131,7 +131,7 @@ class AirbrakeController < ::ApplicationController
     desc = "*Issue reopened after occurring again in _#{@request.environment_name}_ environment.*"
     desc << "\n\n#{render_description(error)}" if @request.reopen_repeat_description?
 
-    issue.status = IssueStatus.where(is_default: true).order(:position).first
+    issue.status = issue.tracker.default_status
 
     issue.init_journal(User.current, desc)
 
