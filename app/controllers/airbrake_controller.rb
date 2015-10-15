@@ -22,6 +22,8 @@ class AirbrakeController < ::ApplicationController
   end
 
   def render_bad_request(error)
+    ::Rails.logger.warn(error.message) if error.is_a?(RedmineAirbrakeBackend::Request::Invalid)
+
     render text: error.message, status: :bad_request
   end
 
