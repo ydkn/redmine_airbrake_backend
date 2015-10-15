@@ -6,7 +6,7 @@ class CreateAirbrakeProjectSettings < ActiveRecord::Migration
       t.references :category
       t.references :priority
       t.string :reopen_regexp
-      t.timestamps
+      t.timestamps null: false
     end
   end
 
