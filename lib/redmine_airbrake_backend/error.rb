@@ -1,45 +1,43 @@
 require 'digest/md5'
+require 'redmine_airbrake_backend/backtrace_element'
+
 
 module RedmineAirbrakeBackend
   # Error received by airbrake
   class Error
-    attr_accessor :request
     attr_reader :type, :message, :backtrace
-    attr_reader :application, :airbrake_hash, :subject, :attachments
+    attr_reader :id, :subject, :application, :attachments
 
-    def initialize(error_data)
-      # Data
-      @data = error_data
-
+    def initialize(data)
       # Type
-      @type = @data[:type]
+      @type = data[:type]
 
       # Message
-      @message = @data[:message]
+      @message = data[:message]
 
       # Backtrace
-      @backtrace = @data[:backtrace]
+      @backtrace = data[:backtrace].map { |b| BacktraceElement.new(b) }
 
-      # Application
-      @application = @data[:application]
-
-      # Attachments
-      @attachments = @data[:attachments]
-
-      # Hash
-      @airbrake_hash = generate_hash
+      # Error ID
+      @id = generate_id
 
       # Subject
       @subject = generate_subject
+
+      # Attachments
+      @attachments = data[:attachments].presence || []
+
+      # Application
+      @application = data[:application].presence
     end
 
     private
 
-    def generate_hash
+    def generate_id
       h = []
-      h << filter_hex_values(@type)
-      h << filter_hex_values(@message)
-      h += normalized_backtrace
+      h << RedmineAirbrakeBackend.filter_hex_values(@type)
+      h << RedmineAirbrakeBackend.filter_hex_values(@message)
+      h += @backtrace.map(&:checksum).compact
 
       Digest::MD5.hexdigest(h.compact.join("\n"))
     end
@@ -48,34 +46,12 @@ module RedmineAirbrakeBackend
       s = ''
 
       if @type.blank? || @message.starts_with?("#{@type}:")
-        s = "[#{@airbrake_hash[0..7]}] #{@message}"
+        s = "[#{@id[0..7]}] #{@message}"
       else
-        s = "[#{@airbrake_hash[0..7]}] #{@type}: #{@message}"
+        s = "[#{@id[0..7]}] #{@type}: #{@message}"
       end
 
       s[0..254].strip
-    end
-
-    def normalized_backtrace
-      if @backtrace.present?
-        @backtrace.map do |e|
-          "#{e[:file]}|#{normalize_method_name(e[:method])}|#{e[:number]}" rescue nil
-        end.compact
-      else
-        []
-      end
-    end
-
-    def normalize_method_name(method_name)
-      name = e[:method]
-        .downcase
-        .gsub(/_\d+_/, '') # ruby blocks
-
-      filter_hex_values(name)
-    end
-
-    def filter_hex_values(value)
-      value.gsub(/0x[0-9a-f]+/, '')
     end
   end
 end

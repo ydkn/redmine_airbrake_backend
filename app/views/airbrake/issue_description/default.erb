@@ -1,5 +1,12 @@
-<% if error.present? %>
 h1. <%= error.message %>
+
+
+<% if error.backtrace.present? %>
+h2. Stacktrace:
+
+p((. <%= raw error.backtrace.map { |e| format_backtrace_element(e) }.join("\n") %>
+<% end %>
+
 
 <% if error.application.present? %>
 h2. Application:
@@ -8,43 +15,30 @@ h2. Application:
 <%= format_list_item('Version', error.application[:version]) %>
 <% end %>
 
-<% if error.backtrace.present? %>
-h2. Stacktrace:
 
-p((. <%= raw error.backtrace.collect { |e| format_backtrace_element(e) }.join("\n") %>
-<% end %>
-<% end %>
-
-<% if request.request.present? %>
-h2. Request:
-
-<%= format_list_item('URL', request.request[:url]) %>
-<%= format_list_item('Component', request.request[:component]) %>
-<%= format_list_item('Action', request.request[:action]) %>
-
-<% if request.request[:params].present? %>
+<% if params[:params].present? %>
 h2. Parameters:
 
-<%= format_table(request.request[:params]) %>
+<%= format_table(params[:params]) %>
 <% end %>
 
-<% if request.request[:cgi_data].present? %>
-h2. Headers:
 
-<%= format_table(request.request[:cgi_data]) %>
+<% if params[:session].present? %>
+h2. Session
+
+<%= format_table(params[:session]) %>
 <% end %>
 
-<% if request.request[:session].present? %>
-h2. Session:
 
-<%= format_table(request.request[:session]) %>
-<% end %>
+<% if params[:context].present? %>
+h2. Context
+
+<%= format_table(params[:context].reject { |k, v| [:notifier].include?(k) }) %>
 <% end %>
 
-<% if request.env.present? %>
+
+<% if params[:environment].present? %>
 h2. Environment
 
-<%= format_list_item('Name', request.environment_name) %>
-<%= format_list_item('Directory', request.env[:project_root]) %>
-<%= format_list_item('Hostname', request.env[:hostname]) %>
+<%= format_table(params[:environment]) %>
 <% end %>

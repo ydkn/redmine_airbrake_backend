@@ -1,8 +1,18 @@
 # Changelog
 
+## Unreleased
+### Changes
+  - Add support for new v3 JSON notices
+  - Add support for new v3 JSON iOS reports
+  - Dropped support for old notices and reports APIs
+  - Add permission to use Airbrake API. No longer bound to issue create permission
+  - Added new key *column* in backtrace to ID calculation
+  - Require Redmine >= 3.2.0
+  - Show hashes in table sections (no recursion)
+
 ## 0.6.1 (2015-04-28)
 ### Fixes
-  - Usage as redmine plugin additional to gem
+  - Usage as Redmine plugin additional to gem
 
 ## 0.6.0 (2015-04-22)
 ### Changed

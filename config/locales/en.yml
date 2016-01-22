@@ -4,7 +4,7 @@ en:
   field_reopen_regexp: Reopen regular expression
   field_reopen_repeat_description: Add new description on reopen
 
-  settings_airbrake_hash_field: Notice Hash Custom Field
+  settings_airbrake_hash_field: Notice ID Custom Field
   settings_airbrake_occurrences_field: Occurrences Custom Field
 
   project_module_airbrake: Airbrake

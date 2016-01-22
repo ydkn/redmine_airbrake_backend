@@ -1,8 +1,7 @@
 Rails.application.routes.draw do
-  # notifier api
-  post '/notifier_api/v2/notices'       => 'airbrake_notice#notice_xml'
-  post '/notifier_api/v3/notices'       => 'airbrake_notice#notice_json'
-  post '/notifier_api/v3/reports/:type' => 'airbrake_report#report'
+  # api
+  post '/api/v3/projects/:project_id/notices'     => 'airbrake_notice#notices'
+  post '/api/v3/projects/:project_id/ios-reports' => 'airbrake_report#ios_reports'
 
   # settings
   resources :projects do

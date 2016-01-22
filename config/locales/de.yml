@@ -4,7 +4,7 @@ de:
   field_reopen_regexp: Regulärer Ausdruck für erneutes Öffnen
   field_reopen_repeat_description: Neue Fehlerbeschreibung bei erneutem Öffnen anfügen
 
-  settings_airbrake_hash_field: "Benutzerdefiniertes Feld für Fehlernummer"
+  settings_airbrake_hash_field: "Benutzerdefiniertes Feld für Fehler-ID"
   settings_airbrake_occurrences_field: "Benutzerdefiniertes Feld für # Auftreten"
 
   project_module_airbrake: Airbrake

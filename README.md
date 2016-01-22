@@ -8,7 +8,7 @@ This plugin provides the necessary API to use Redmine as an Airbrake backend.
 
 ## Installation
 
-Add this line to your Redmine Gemfile:
+Add this line to the Gemfile or Gemfile.local of your Redmine installation:
 ```ruby
 gem 'redmine_airbrake_backend'
 ```
@@ -19,7 +19,7 @@ $ bundle install
 $ rake redmine:plugins:migrate
 ```
 
-### Alternate installation
+### Alternate installation method
 
 Please see http://www.redmine.org/projects/redmine/wiki/Plugins for installation instructions.
 
@@ -30,8 +30,9 @@ Please see http://www.redmine.org/projects/redmine/wiki/Plugins for installation
   * Airbrake hash (String) (required)
   * Number of occurrences (Integer) (optional)
 3. Configure the plugin to use these 2 custom fields (Administration -> Plugins -> Airbrake -> Configure)
-4. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake hash field to your project)
-5. Configure additional defaults under the settings tab (Airbrake)
+4. Check if the custom fields are assigned to the trackers you want to use with airbrake
+5. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake notice ID custom field to your project if it is not a global field)
+6. Configure additional defaults under the settings tab per project (Airbrake)
 
 ## Client configuration
 
@@ -40,20 +41,20 @@ For a Rails application add the airbrake gem to your Gemfile:
 gem 'airbrake'
 ```
 
-And configure it, e.g. with a initializer `config/initializers/airbrake.rb`:
+And configure it, e.g. with an initializer `config/initializers/airbrake.rb`:
 ```ruby
-Airbrake.configure do |config|
-  config.api_key = {
-      project: 'redmine_project_identifier',    # the identifier you specified for your project in Redmine
-      api_key: 'redmine_api_key',               # the api key for a user which has permission to create issues in the project specified in the previous step
-      tracker: 'Bug',                           # the name or id of your desired tracker (optional if default is configured)
-      category: 'Development',                  # the name or id of a ticket category, optional
-      priority: 5,                              # the name or id of the priority for new tickets, optional.
-      assignee: 'admin'                         # the login or id of a user the ticket should get assigned to by default, optional
+Airbrake.configure do |c|
+  c.project_id     = 'redmine_project_identifier'
+  c.project_key    = {
+      key:      'redmine_api_key', # the api key for a user which has permission to create issues in the project specified in the previous step
+      tracker:  'Bug',             # the name or id of your desired tracker (optional if default is configured)
+      category: 'Development',     # the name or id of a ticket category, optional
+      priority: 5,                 # the name or id of the priority for new tickets, optional.
+      assignee: 'admin'            # the login or id of a user the ticket should get assigned to by default, optional
     }.to_json
-  config.host = 'my_redmine_host.com'           # the hostname your Redmine runs at
-  config.port = 443                             # the port your Redmine runs at
-  config.secure = true                          # sends data to your server using SSL, optional
+  c.host           = 'https://redmine.example.com/'
+  c.root_directory = Rails.root
+  c.environment    = 'production'
 end
 ```
 

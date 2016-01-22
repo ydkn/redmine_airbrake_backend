@@ -1,25 +1,30 @@
 # Controller for airbrake notices
 class AirbrakeNoticeController < ::AirbrakeController
-  prepend_before_filter :parse_xml_request,  only: [:notice_xml]
-  prepend_before_filter :parse_json_request, only: [:notice_json]
+  accept_api_auth :notices
 
-  accept_api_auth :notice_xml, :notice_json
+  # Handle airbrake notices
+  def notices
+    @issue = nil
 
-  # Handle airbrake XML notices
-  def notice_xml
-    render xml: {
-      notice: {
-        id: (@results.first[:hash] rescue nil)
+    params[:errors].each do |e|
+      error = RedmineAirbrakeBackend::Error.new(e)
+
+      issue = find_or_initialize_issue(error)
+
+      set_issue_custom_field_values(issue, error)
+
+      reopen_issue(issue, error) if issue.persisted? && issue.status.is_closed? && reopen_issue?
+
+      @issue ||= issue if issue.save
+    end
+
+    if @issue.present?
+      render json: {
+        id:  (CustomValue.find_by(customized_type: Issue.name, customized_id: @issue.id, custom_field_id: notice_hash_field.id).value rescue nil),
+        url: issue_url(@issue)
       }
-    }
-  end
-
-  # Handle airbrake JSON notices
-  def notice_json
-    render json: {
-      notice: {
-        id: (@results.first[:hash] rescue nil)
-      }
-    }
+    else
+      render json: {}
+    end
   end
 end

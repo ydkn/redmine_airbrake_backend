@@ -36,10 +36,11 @@ module RedmineAirbrakeBackend
         description      'Airbrake Backend for Redmine'
         url              'https://github.com/ydkn/redmine_airbrake_backend'
         version          ::RedmineAirbrakeBackend::VERSION
-        requires_redmine version_or_higher: '3.1.0'
+        requires_redmine version_or_higher: '3.2.0'
         directory        RedmineAirbrakeBackend.directory
 
         project_module :airbrake do
+          permission :airbrake, { airbrake_notice: [:notices], airbrake_report: [:ios_reports] }
           permission :manage_airbrake, { airbrake: [:update] }
         end
 
