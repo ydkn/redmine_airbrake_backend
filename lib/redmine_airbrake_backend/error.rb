@@ -25,7 +25,7 @@ module RedmineAirbrakeBackend
       @subject = generate_subject
 
       # Attachments
-      @attachments = data[:attachments].presence || []
+      @attachments = (data[:attachments].presence || []).compact
 
       # Application
       @application = data[:application].presence

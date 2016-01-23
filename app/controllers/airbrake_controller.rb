@@ -8,6 +8,7 @@ class AirbrakeController < ::ApplicationController
 
   skip_before_action :verify_authenticity_token
 
+  prepend_before_action :load_records
   prepend_before_action :parse_key
   prepend_before_action :find_project
   before_action :set_environment
@@ -30,6 +31,11 @@ class AirbrakeController < ::ApplicationController
     raise InvalidRequest.new('No or invalid API key') if @key.blank? || @key[:key].blank?
     params[:key] = @key[:key]
 
+    # Type
+    @type = @key[:type] || (params[:context][:language].split('/', 2).first.downcase rescue nil)
+  end
+
+  def load_records
     # Tracker
     @tracker = record_for(@project.trackers, :tracker)
     raise InvalidRequest.new('No or invalid tracker') if @tracker.blank?
@@ -48,13 +54,10 @@ class AirbrakeController < ::ApplicationController
 
     # Repository
     @repository = @project.repositories.find_by(identifier: (@key[:repository] || ''))
-
-    # Type
-    @type = @key[:type] || (params[:context][:language].split('/', 2).first.downcase rescue nil)
   end
 
   def set_environment
-    @environment = params[:context][:environment].presence rescue nil
+    @environment ||= params[:context][:environment].presence rescue nil
   end
 
   def render_bad_request(error)
