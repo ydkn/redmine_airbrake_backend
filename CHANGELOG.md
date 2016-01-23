@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 (2016-01-23)
 ### Changes
   - Add support for new v3 JSON notices
   - Add support for new v3 JSON iOS reports
