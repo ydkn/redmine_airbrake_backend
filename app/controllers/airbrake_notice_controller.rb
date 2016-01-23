@@ -4,8 +4,14 @@ class AirbrakeNoticeController < ::AirbrakeController
 
   # Handle airbrake notices
   def notices
-    @issue = nil
+    create_issues
 
+    render_airbrake_response
+  end
+
+  private
+
+  def create_issues
     params[:errors].each do |e|
       error = RedmineAirbrakeBackend::Error.new(e)
 
@@ -16,15 +22,6 @@ class AirbrakeNoticeController < ::AirbrakeController
       reopen_issue(issue, error) if issue.persisted? && issue.status.is_closed? && reopen_issue?
 
       @issue ||= issue if issue.save
-    end
-
-    if @issue.present?
-      render json: {
-        id:  (CustomValue.find_by(customized_type: Issue.name, customized_id: @issue.id, custom_field_id: notice_hash_field.id).value rescue nil),
-        url: issue_url(@issue)
-      }
-    else
-      render json: {}
     end
   end
 end

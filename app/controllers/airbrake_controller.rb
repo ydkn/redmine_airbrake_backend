@@ -63,6 +63,17 @@ class AirbrakeController < ::ApplicationController
     render text: error.message, status: :bad_request
   end
 
+  def render_airbrake_response
+    if @issue.present?
+      render json: {
+        id:  (CustomValue.find_by(customized_type: Issue.name, customized_id: @issue.id, custom_field_id: notice_hash_field.id).value rescue nil),
+        url: issue_url(@issue)
+      }
+    else
+      render json: {}
+    end
+  end
+
   def record_for(on, key, fields = [:id, :name])
     fields.each do |field|
       val = on.find_by(field => @key[key])
