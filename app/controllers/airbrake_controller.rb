@@ -28,7 +28,7 @@ class AirbrakeController < ::ApplicationController
     @key = JSON.parse(params[:key]).symbolize_keys #rescue nil
 
     # API key
-    raise InvalidRequest.new('No or invalid API key') if @key.blank? || @key[:key].blank?
+    invalid_request!('No or invalid API key') if @key.blank? || @key[:key].blank?
     params[:key] = @key[:key]
 
     # Type
@@ -38,10 +38,10 @@ class AirbrakeController < ::ApplicationController
   def load_records
     # Tracker
     @tracker = record_for(@project.trackers, :tracker)
-    raise InvalidRequest.new('No or invalid tracker') if @tracker.blank?
+    invalid_request!('No or invalid tracker') if @tracker.blank?
 
     # Notice ID field
-    raise InvalidRequest.new('Custom field for notice hash not available on selected tracker') if @tracker.custom_fields.find_by(id: notice_hash_field.id).blank?
+    invalid_request!('Custom field for notice hash not available on selected tracker') if @tracker.custom_fields.find_by(id: notice_hash_field.id).blank?
 
     # Category
     @category = record_for(@project.issue_categories, :category)
@@ -58,6 +58,10 @@ class AirbrakeController < ::ApplicationController
 
   def set_environment
     @environment ||= params[:context][:environment].presence rescue nil
+  end
+
+  def invalid_request!(message)
+    raise InvalidRequest.new(message)
   end
 
   def render_bad_request(error)
