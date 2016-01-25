@@ -8,7 +8,7 @@ module AirbrakeHelper
       if value.is_a?(String)
         lines << "|@#{key}@|@#{value}@|"
       elsif value.is_a?(Hash)
-        lines << "|@#{key}@|@#{value.map { |k, v| "#{k}: #{v}"}.join(',')}@|"
+        lines << "|@#{key}@|@#{value.map { |k, v| "#{k}: #{v}"}.join(', ')}@|"
       end
     end
     lines.join("\n")
