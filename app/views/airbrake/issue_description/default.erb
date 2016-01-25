@@ -33,7 +33,7 @@ h2. Session
 <% if params[:context].present? %>
 h2. Context
 
-<%= format_table(params[:context].reject { |k, v| [:notifier].include?(k) }) %>
+<%= format_table(params[:context].reject { |k, v| ['notifier'].include?(k) }) %>
 <% end %>
 
 
