@@ -33,6 +33,7 @@ Please see http://www.redmine.org/projects/redmine/wiki/Plugins for installation
 4. Check if the custom fields are assigned to the trackers you want to use with airbrake
 5. Enable the project module (Airbrake) in your project settings (don't forget to add at least the Airbrake notice ID custom field to your project if it is not a global field)
 6. Configure additional defaults under the settings tab per project (Airbrake)
+6. Check if the user used for airbrake has a role with the _Airbrake_ permission
 
 ## Client configuration
 
