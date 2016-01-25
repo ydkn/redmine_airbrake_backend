@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1 (2016-01-25)
+### Fixes
+  - Add space to comma separated key-value list in description tables
+  - Exclude notifier information from context table
+
 ## 1.0.0 (2016-01-23)
 ### Changes
   - Add support for new v3 JSON notices
