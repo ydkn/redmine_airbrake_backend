@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 (2016-01-26)
+### Fixes
+  - Wrong status code for response
+
 ## 1.0.1 (2016-01-25)
 ### Fixes
   - Add space to comma separated key-value list in description tables
