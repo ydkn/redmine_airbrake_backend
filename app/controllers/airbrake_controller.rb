@@ -75,7 +75,7 @@ class AirbrakeController < ::ApplicationController
       render json: {
         id:  (CustomValue.find_by(customized_type: Issue.name, customized_id: @issue.id, custom_field_id: notice_hash_field.id).value rescue nil),
         url: issue_url(@issue)
-      }
+      }, status: :created
     else
       render json: {}
     end
