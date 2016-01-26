@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3 (2016-01-26)
+### Fixes
+  - Fix syntax error
+
 ## 1.0.2 (2016-01-26)
 ### Fixes
   - Wrong status code for response

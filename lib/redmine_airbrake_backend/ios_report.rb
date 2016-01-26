@@ -25,7 +25,10 @@ module RedmineAirbrakeBackend
       data.split("\n").each do |line|
         header_finished = true if line =~ /^(Application Specific Information|Last Exception Backtrace|Thread \d+( Crashed)?):$/
 
-        indicent_identifier = parse_header_line(line, error) unless header_finished
+        unless header_finishedii
+          ii = parse_header_line(line, error)
+          indicent_identifier ||= ii if ii
+        end
 
         if next_line_is_message
           next_line_is_message = false
@@ -55,7 +58,7 @@ module RedmineAirbrakeBackend
     def self.parse_header_line(line, error)
       key, value = line.split(':', 2).map { |s| s.strip }
 
-      next if key.blank? || value.blank?
+      return nil if key.blank? || value.blank?
 
       case key
       when 'Exception Type'
