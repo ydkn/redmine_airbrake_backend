@@ -1,44 +1,45 @@
-h1. <%= error.message %>
+<% notice.errors.each do |error| %>
+h1. <%= airbrake_error_title(error) %>
 
 
 <% if error.backtrace.present? %>
 h2. Stacktrace:
 
-p((. <%= raw error.backtrace.map { |e| format_backtrace_element(e) }.join("\n") %>
+p((. <%= raw error.backtrace.map { |e| airbrake_format_backtrace_element(e) }.join("\n") %>
+<% end %>
 <% end %>
 
-
-<% if error.application.present? %>
+<% if notice.application.present? %>
 h2. Application:
 
-<%= format_list_item('Name', error.application[:name]) %>
-<%= format_list_item('Version', error.application[:version]) %>
+<%= airbrake_format_list_item('Name', notice.application[:name]) %>
+<%= airbrake_format_list_item('Version', notice.application[:version]) %>
 <% end %>
 
 
-<% if params[:params].present? %>
+<% if notice.params.present? %>
 h2. Parameters:
 
-<%= format_table(params[:params]) %>
+<%= airbrake_format_table(notice.params) %>
 <% end %>
 
 
-<% if params[:session].present? %>
+<% if notice.session.present? %>
 h2. Session
 
-<%= format_table(params[:session]) %>
+<%= airbrake_format_table(notice.session) %>
 <% end %>
 
 
-<% if params[:context].present? %>
+<% if notice.context.present? %>
 h2. Context
 
-<%= format_table(params[:context].reject { |k, v| ['notifier'].include?(k) }) %>
+<%= airbrake_format_table(notice.context) %>
 <% end %>
 
 
-<% if params[:environment].present? %>
+<% if notice.environment.present? %>
 h2. Environment
 
-<%= format_table(params[:environment]) %>
+<%= airbrake_format_table(notice.environment) %>
 <% end %>

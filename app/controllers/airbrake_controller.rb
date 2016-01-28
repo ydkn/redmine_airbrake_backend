@@ -1,5 +1,5 @@
 require 'tempfile'
-require 'redmine_airbrake_backend/error'
+require 'redmine_airbrake_backend/notice'
 
 
 # Controller with airbrake related stuff
@@ -11,7 +11,6 @@ class AirbrakeController < ::ApplicationController
   prepend_before_action :load_records
   prepend_before_action :parse_key
   prepend_before_action :find_project
-  before_action :set_environment
   before_action :authorize
 
   after_action :cleanup_tempfiles
@@ -25,14 +24,11 @@ class AirbrakeController < ::ApplicationController
   end
 
   def parse_key
-    @key = JSON.parse(params[:key]).symbolize_keys #rescue nil
+    @key = JSON.parse(params[:key]).symbolize_keys rescue nil
 
     # API key
     invalid_request!('No or invalid API key') if @key.blank? || @key[:key].blank?
     params[:key] = @key[:key]
-
-    # Type
-    @type = @key[:type] || (params[:context][:language].split('/', 2).first.downcase rescue nil)
   end
 
   def load_records
@@ -54,10 +50,6 @@ class AirbrakeController < ::ApplicationController
 
     # Repository
     @repository = @project.repositories.find_by(identifier: (@key[:repository] || ''))
-  end
-
-  def set_environment
-    @environment ||= params[:context][:environment].presence rescue nil
   end
 
   def invalid_request!(message)
@@ -112,39 +104,52 @@ class AirbrakeController < ::ApplicationController
     custom_field(:occurrences_field)
   end
 
+  def create_issue!
+    return if @notice.blank?
+    return if @notice.errors.blank?
+
+    @issue = find_or_initialize_issue(@notice)
+
+    set_issue_custom_field_values(@issue, @notice)
+
+    reopen_issue(@issue, @notice) if @issue.persisted? && @issue.status.is_closed? && reopen_issue?(@notice)
+
+    @issue = nil unless @issue.save
+  end
+
   # Load or initialize issue by project, tracker and airbrake hash
-  def find_or_initialize_issue(error)
-    issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: error.id).pluck(:customized_id)
+  def find_or_initialize_issue(notice)
+    issue_ids = CustomValue.where(customized_type: Issue.name, custom_field_id: notice_hash_field.id, value: notice.id).pluck(:customized_id)
 
     issue = Issue.find_by(id: issue_ids, project_id: @project.id, tracker_id: @tracker.id)
 
     return issue if issue.present?
 
-    initialize_issue(error)
+    initialize_issue(notice)
   end
 
-  def initialize_issue(error)
+  def initialize_issue(notice)
     issue = Issue.new(
-        subject: error.subject,
+        subject: notice.subject,
         project: @project,
         tracker: @tracker,
         author: User.current,
         category: @category,
         priority: @priority,
-        description: render_description(error),
+        description: render_description(notice),
         assigned_to: @assignee
       )
 
-    add_attachments_to_issue(issue, error)
+    add_attachments_to_issue(issue, notice)
 
     issue
   end
 
-  def set_issue_custom_field_values(issue, error)
+  def set_issue_custom_field_values(issue, notice)
     custom_field_values = {}
 
     # Error ID
-    custom_field_values[notice_hash_field.id] = error.id if issue.new_record?
+    custom_field_values[notice_hash_field.id] = notice.id if issue.new_record?
 
     # Update occurrences
     if occurrences_field.present?
@@ -155,12 +160,12 @@ class AirbrakeController < ::ApplicationController
     issue.custom_field_values = custom_field_values
   end
 
-  def add_attachments_to_issue(issue, error)
-    return if error.attachments.blank?
+  def add_attachments_to_issue(issue, notice)
+    return if notice.attachments.blank?
 
     @tempfiles ||= []
 
-    error.attachments.each do |data|
+    notice.attachments.each do |data|
       filename = data[:filename].presence || Redmine::Utils.random_hex(16)
 
       file = Tempfile.new(filename)
@@ -173,37 +178,37 @@ class AirbrakeController < ::ApplicationController
     end
   end
 
-  def reopen_issue?
+  def reopen_issue?(notice)
     reopen_regexp = project_setting(:reopen_regexp)
 
     return false if reopen_regexp.blank?
-    return false if @environment.blank?
+    return false if notice.environment_name.blank?
 
-    !!(@environment =~ /#{reopen_regexp}/i)
+    !!(notice.environment_name =~ /#{reopen_regexp}/i)
   end
 
   def issue_reopen_repeat_description?
     !!project_setting(:reopen_repeat_description)
   end
 
-  def reopen_issue(issue, error)
-    return if @environment.blank?
+  def reopen_issue(issue, notice)
+    return if notice.environment_name.blank?
 
-    desc = "*Issue reopened after occurring again in _#{@environment}_ environment.*"
-    desc << "\n\n#{render_description(error)}" if issue_reopen_repeat_description?
+    desc = "*Issue reopened after occurring again in _#{notice.environment_name}_ environment.*"
+    desc << "\n\n#{render_description(notice)}" if issue_reopen_repeat_description?
 
     issue.status = issue.tracker.default_status
 
     issue.init_journal(User.current, desc)
 
-    add_attachments_to_issue(issue, error)
+    add_attachments_to_issue(issue, notice)
   end
 
-  def render_description(error)
-    locals = { error: error }
+  def render_description(notice)
+    locals = { notice: notice }
 
-    if template_exists?("airbrake/issue_description/#{@type}")
-      render_to_string("airbrake/issue_description/#{@type}", layout: false, locals: locals)
+    if template_exists?("airbrake/issue_description/#{notice.type}")
+      render_to_string("airbrake/issue_description/#{notice.type}", layout: false, locals: locals)
     else
       render_to_string('airbrake/issue_description/default', layout: false, locals: locals)
     end

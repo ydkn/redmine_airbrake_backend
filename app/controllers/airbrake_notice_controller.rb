@@ -2,26 +2,24 @@
 class AirbrakeNoticeController < ::AirbrakeController
   accept_api_auth :notices
 
+  before_action :parse_notice
+
   # Handle airbrake notices
   def notices
-    create_issues
+    create_issue!
 
     render_airbrake_response
   end
 
   private
 
-  def create_issues
-    params[:errors].each do |e|
-      error = RedmineAirbrakeBackend::Error.new(e)
-
-      issue = find_or_initialize_issue(error)
-
-      set_issue_custom_field_values(issue, error)
-
-      reopen_issue(issue, error) if issue.persisted? && issue.status.is_closed? && reopen_issue?
-
-      @issue ||= issue if issue.save
-    end
+  def parse_notice
+    @notice = RedmineAirbrakeBackend::Notice.new(
+        errors:      params[:errors].map { |e| RedmineAirbrakeBackend::Error.new(e) },
+        params:      params[:params],
+        session:     params[:session],
+        context:     params[:context],
+        environment: params[:environment]
+      )
   end
 end

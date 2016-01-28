@@ -5,30 +5,20 @@ require 'redmine_airbrake_backend/backtrace_element'
 module RedmineAirbrakeBackend
   # Error received by airbrake
   class Error
-    attr_reader :type, :message, :backtrace
-    attr_reader :id, :subject, :application, :attachments
+    attr_reader :id, :type, :message, :backtrace
 
-    def initialize(data)
+    def initialize(options)
       # Type
-      @type = data[:type]
+      @type = options[:type]
 
       # Message
-      @message = data[:message]
+      @message = options[:message]
 
       # Backtrace
-      @backtrace = data[:backtrace].map { |b| BacktraceElement.new(b) }
+      @backtrace = options[:backtrace].map { |b| BacktraceElement.new(b) }
 
       # Error ID
       @id = generate_id
-
-      # Subject
-      @subject = generate_subject
-
-      # Attachments
-      @attachments = (data[:attachments].presence || []).compact
-
-      # Application
-      @application = data[:application].presence
     end
 
     private
@@ -40,18 +30,6 @@ module RedmineAirbrakeBackend
       h += @backtrace.map(&:checksum).compact
 
       Digest::MD5.hexdigest(h.compact.join("\n"))
-    end
-
-    def generate_subject
-      s = ''
-
-      if @type.blank? || @message.starts_with?("#{@type}:")
-        s = "[#{@id[0..7]}] #{@message}"
-      else
-        s = "[#{@id[0..7]}] #{@type}: #{@message}"
-      end
-
-      s[0..254].strip
     end
   end
 end

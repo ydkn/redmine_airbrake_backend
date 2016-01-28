@@ -3,6 +3,7 @@
 ## Unreleased
 ### Fixes
   - Handle new ruby lambda backtrace syntax
+  - Don't treat nested errors separately
 
 ## 1.0.3 (2016-01-26)
 ### Fixes
