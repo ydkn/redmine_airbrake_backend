@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixes
+  - Handle new ruby lambda backtrace syntax
+
 ## 1.0.3 (2016-01-26)
 ### Fixes
   - Fix syntax error

@@ -29,7 +29,7 @@ module RedmineAirbrakeBackend
     def normalize_function_name(function_name)
       name = @function
         .downcase
-        .gsub(/_\d+_/, '') # ruby blocks
+        .gsub(/([\d_]+$)?/, '') # ruby blocks
 
       RedmineAirbrakeBackend.filter_hex_values(name)
     end
