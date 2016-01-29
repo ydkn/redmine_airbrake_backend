@@ -45,7 +45,7 @@ module RedmineAirbrakeBackend
     private
 
     def generate_id
-      Digest::MD5.hexdigest(@errors.join("\n"))
+      Digest::MD5.hexdigest(@errors.map(&:id).join("\n"))
     end
 
     def generate_subject
