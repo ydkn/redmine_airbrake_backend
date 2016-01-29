@@ -1,12 +1,12 @@
 <% notice.errors.each do |error| %>
 h1. <%= airbrake_error_title(error) %>
 
-
 <% if error.backtrace.present? %>
 h2. Stacktrace:
 
 p((. <%= raw error.backtrace.map { |e| airbrake_format_backtrace_element(e) }.join("\n") %>
 <% end %>
+
 <% end %>
 
 <% if notice.application.present? %>
