@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2016-01-29)
 ### Fixes
   - Handle new ruby lambda backtrace syntax
   - Don't treat nested errors separately
