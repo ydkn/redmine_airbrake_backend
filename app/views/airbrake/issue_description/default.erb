@@ -17,29 +17,13 @@ h2. Application:
 <% end %>
 
 
-<% if notice.params.present? %>
-h2. Parameters:
-
-<%= airbrake_format_table(notice.params) %>
-<% end %>
+<%= airbrake_render_section(notice.params, 'Parameters') %>
 
 
-<% if notice.session.present? %>
-h2. Session
-
-<%= airbrake_format_table(notice.session) %>
-<% end %>
+<%= airbrake_render_section(notice.session, 'Session') %>
 
 
-<% if notice.context.present? %>
-h2. Context
-
-<%= airbrake_format_table(notice.context) %>
-<% end %>
+<%= airbrake_render_section(notice.context, 'Context') %>
 
 
-<% if notice.environment.present? %>
-h2. Environment
-
-<%= airbrake_format_table(notice.environment) %>
-<% end %>
+<%= airbrake_render_section(notice.environment, 'Environment') %>

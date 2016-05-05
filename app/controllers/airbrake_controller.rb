@@ -1,7 +1,6 @@
 require 'tempfile'
 require 'redmine_airbrake_backend/notice'
 
-
 # Controller with airbrake related stuff
 class AirbrakeController < ::ApplicationController
   class InvalidRequest < StandardError; end
@@ -29,7 +28,7 @@ class AirbrakeController < ::ApplicationController
   end
 
   def parse_key
-    @key = JSON.parse(params[:key]).symbolize_keys rescue nil
+    @key = JSON.parse(params[:key]).with_indifferent_access rescue nil
 
     # API key
     invalid_request!('No or invalid API key') if @key.blank? || @key[:key].blank?

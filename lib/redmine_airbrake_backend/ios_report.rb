@@ -1,6 +1,5 @@
 require 'redmine_airbrake_backend/notice'
 
-
 module RedmineAirbrakeBackend
   # iOS Report received by airbrake
   class IosReport < Notice

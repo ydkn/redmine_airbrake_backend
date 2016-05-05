@@ -1,6 +1,5 @@
 require 'redmine_airbrake_backend/ios_report'
 
-
 # Controller for airbrake reports
 class AirbrakeReportController < ::AirbrakeController
   accept_api_auth :ios_reports

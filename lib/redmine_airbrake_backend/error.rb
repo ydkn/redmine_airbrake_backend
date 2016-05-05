@@ -1,7 +1,6 @@
 require 'digest/md5'
 require 'redmine_airbrake_backend/backtrace_element'
 
-
 module RedmineAirbrakeBackend
   # Error received by airbrake
   class Error

@@ -1,6 +1,5 @@
 require 'redmine_airbrake_backend/error'
 
-
 module RedmineAirbrakeBackend
   # Notice received by airbrake
   class Notice

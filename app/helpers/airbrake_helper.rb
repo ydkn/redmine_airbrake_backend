@@ -18,7 +18,7 @@ module AirbrakeHelper
       if value.is_a?(String)
         lines << "|@#{key}@|@#{value}@|"
       elsif value.is_a?(Hash)
-        lines << "|@#{key}@|@#{value.map { |k, v| "#{k}: #{v}"}.join(', ')}@|"
+        lines << "|@#{key}@|@#{value.map { |k, v| "#{k}: #{v}" }.join(', ')}@|"
       end
     end
 
@@ -53,6 +53,10 @@ module AirbrakeHelper
     end
 
     markup + " in ??<notextile>#{element.function}</notextile>??"
+  end
+
+  def airbrake_render_section(data, section)
+    render partial: 'airbrake/issue_description/section', locals: { data: data, section: section }
   end
 
   private

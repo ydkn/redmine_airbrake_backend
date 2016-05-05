@@ -1,6 +1,5 @@
 require 'digest/md5'
 
-
 module RedmineAirbrakeBackend
   # Backtrace element received by airbrake
   class BacktraceElement
