@@ -8,10 +8,15 @@ class AirbrakeController < ::ApplicationController
 
   skip_before_action :verify_authenticity_token
 
-  prepend_before_action :load_records
   prepend_before_action :parse_key
   prepend_before_action :find_project
+
   before_action :authorize
+  before_action :find_tracker
+  before_action :find_category
+  before_action :find_priority
+  before_action :find_assignee
+  before_action :find_repository
 
   after_action :cleanup_tempfiles
 
@@ -31,24 +36,27 @@ class AirbrakeController < ::ApplicationController
     params[:key] = @key[:key]
   end
 
-  def load_records
-    # Tracker
+  def find_tracker
     @tracker = record_for(@project.trackers, :tracker)
     invalid_request!('No or invalid tracker') if @tracker.blank?
 
-    # Notice ID field
+    # Check notice ID field
     invalid_request!('Custom field for notice hash not available on selected tracker') if @tracker.custom_fields.find_by(id: notice_hash_field.id).blank?
+  end
 
-    # Category
+  def find_category
     @category = record_for(@project.issue_categories, :category)
+  end
 
-    # Priority
+  def find_priority
     @priority = record_for(IssuePriority, :priority) || IssuePriority.default
+  end
 
-    # Assignee
+  def find_assignee
     @assignee = record_for(@project.users, :assignee, [:id, :login])
+  end
 
-    # Repository
+  def find_repository
     @repository = @project.repositories.find_by(identifier: (@key[:repository] || ''))
   end
 
