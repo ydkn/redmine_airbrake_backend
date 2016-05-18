@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 (2016-05-18)
 ### Fixes
   - Add missing foreign_key option on issue category has many relation. Caused error on removing issue category
 
