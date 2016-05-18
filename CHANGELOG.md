@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixes
+  - Add missing foreign_key option on issue category has many relation. Caused error on removing issue category
+
 ## 1.1.0 (2016-01-29)
 ### Fixes
   - Handle new ruby lambda backtrace syntax

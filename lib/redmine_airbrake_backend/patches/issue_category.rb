@@ -5,7 +5,7 @@ module RedmineAirbrakeBackend::Patches
     extend ActiveSupport::Concern
 
     included do
-      has_many :airbrake_project_settings, dependent: :nullify
+      has_many :airbrake_project_settings, foreign_key: :category_id, dependent: :nullify
     end
   end
 end
