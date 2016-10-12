@@ -56,6 +56,8 @@ module AirbrakeHelper
   end
 
   def airbrake_render_section(data, section)
+    return nil if data.blank?
+
     render partial: 'airbrake/issue_description/section', locals: { data: data, section: section }
   end
 
