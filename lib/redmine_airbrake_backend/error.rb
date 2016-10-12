@@ -14,7 +14,7 @@ module RedmineAirbrakeBackend
       @message = options[:message]
 
       # Backtrace
-      @backtrace = options[:backtrace].map { |b| BacktraceElement.new(b) }
+      @backtrace = Array(options[:backtrace]).map { |b| BacktraceElement.new(b) }
 
       # Error ID
       @id = generate_id

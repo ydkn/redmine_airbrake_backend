@@ -3,6 +3,7 @@
 ## Unreleased
 ### Fixes
   - Prevent rendering of empty sections
+  - Handle notices without a backtrace
 
 ## 1.1.1 (2016-05-18)
 ### Fixes
