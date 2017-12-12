@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.2 (2017-12-12)
 ### Fixes
   - Prevent rendering of empty sections
   - Handle notices without a backtrace
