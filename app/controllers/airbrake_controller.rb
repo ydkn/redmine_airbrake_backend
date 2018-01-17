@@ -7,8 +7,8 @@ class AirbrakeController < ::ApplicationController
 
   skip_before_action :verify_authenticity_token
 
-  prepend_before_action :parse_key
   prepend_before_action :find_project
+  prepend_before_action :parse_key
 
   before_action :authorize
   before_action :find_tracker
@@ -24,13 +24,20 @@ class AirbrakeController < ::ApplicationController
   private
 
   def find_project
-    @project = Project.find(params[:project_id])
+    @project = Project.find(@key[:project] || params[:project_id])
   end
 
   def parse_key
-    @key = JSON.parse(params[:key]).with_indifferent_access rescue nil
+    @key = nil
 
-    # API key
+    if (request.headers['HTTP_AUTHORIZATION'] || '') =~ /^Bearer\s+(.*)\s*$/i
+      # New auth method
+      @key = JSON.parse(Regexp.last_match[1]).with_indifferent_access rescue nil
+    elsif params[:key].present?
+      # Old auth method
+      @key = JSON.parse(params[:key]).with_indifferent_access rescue nil
+    end
+
     invalid_request!('No or invalid API key') if @key.blank? || @key[:key].blank?
     params[:key] = @key[:key]
   end
@@ -90,7 +97,7 @@ class AirbrakeController < ::ApplicationController
   end
 
   def global_setting(key)
-    Setting.plugin_redmine_airbrake_backend[key]
+    Setting.plugin_redmine_airbrake_backend[key.to_s]
   end
 
   def project_setting(key)
