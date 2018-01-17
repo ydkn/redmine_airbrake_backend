@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 (2018-01-17)
 ### Features
   - Support airbrake token based authentication
 
