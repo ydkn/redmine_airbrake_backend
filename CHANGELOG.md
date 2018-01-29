@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2018-01-29)
+### Features
+  - All responses are formatted as JSON
+
 ## 1.2.0 (2018-01-17)
 ### Features
   - Support airbrake token based authentication

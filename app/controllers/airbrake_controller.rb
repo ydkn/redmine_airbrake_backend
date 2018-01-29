@@ -3,9 +3,8 @@ require 'redmine_airbrake_backend/notice'
 
 # Controller with airbrake related stuff
 class AirbrakeController < ::ApplicationController
-  class InvalidRequest < StandardError; end
-
   skip_before_action :verify_authenticity_token
+  skip_before_action :session_expiration, :user_setup, :check_if_login_required, :set_localization, :check_password_change
 
   prepend_before_action :find_project
   prepend_before_action :parse_key
@@ -18,8 +17,6 @@ class AirbrakeController < ::ApplicationController
   before_action :find_repository
 
   after_action :cleanup_tempfiles
-
-  rescue_from InvalidRequest, with: :render_bad_request
 
   private
 
@@ -38,16 +35,30 @@ class AirbrakeController < ::ApplicationController
       @key = JSON.parse(params[:key]).with_indifferent_access rescue nil
     end
 
-    invalid_request!('No or invalid API key') if @key.blank? || @key[:key].blank?
-    params[:key] = @key[:key]
+    render_error('No or invalid API key format', :unauthorized) if @key.blank? || @key[:key].blank?
+  end
+
+  def authorize
+    User.current = User.find_by_api_key(@key[:key])
+
+    if User.current.blank? || User.current.anonymous?
+      render_error('Failed to authenticate', :unauthorized)
+
+      return
+    end
+
+    return if User.current.allowed_to?({ controller: params[:controller], action: params[:action] }, @project)
+
+    render_error('Access Denied', :forbidden)
   end
 
   def find_tracker
     @tracker = record_for(@project.trackers, :tracker)
-    invalid_request!('No or invalid tracker') if @tracker.blank?
+
+    render_error('No or invalid tracker', :failed_dependency) if @tracker.blank?
 
     # Check notice ID field
-    invalid_request!('Custom field for notice hash not available on selected tracker') if @tracker.custom_fields.find_by(id: notice_hash_field.id).blank?
+    render_error('Custom field for notice hash not available on selected tracker', :failed_dependency) if @tracker.custom_fields.find_by(id: notice_hash_field.id).blank?
   end
 
   def find_category
@@ -66,14 +77,10 @@ class AirbrakeController < ::ApplicationController
     @repository = @project.repositories.find_by(identifier: (@key[:repository] || ''))
   end
 
-  def invalid_request!(message)
-    raise InvalidRequest.new(message)
-  end
+  def render_error(error, status = :internal_server_error)
+    ::Rails.logger.warn(error)
 
-  def render_bad_request(error)
-    ::Rails.logger.warn(error.message)
-
-    render text: error.message, status: :bad_request
+    render json: { error: { message: error } }, status: status
   end
 
   def render_airbrake_response
